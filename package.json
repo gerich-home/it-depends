@@ -7,7 +7,8 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "mocha": "^2.4.5",
-    "gulp": "~3.9.0"
+    "gulp": "~3.9.0",
+    "gulp-mocha-phantomjs": "~0.11.0"
   },
   "scripts": {
     "test": "mocha"
