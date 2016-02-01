@@ -1,21 +1,25 @@
 ﻿'use strict';
-/*! itDepends - v1.0.0
+/*!
+* itDepends - v{{ version }}
 * https://github.com/gerich-home/itDepends
-* Copyright (c) 2016 Sergey Gerasimov; Licensed MSPL */
-(function (factory) {
-    if (typeof window.require === 'function' && typeof window.exports === 'object' && typeof window.module === 'object') {
+* Copyright (c) 2016 Sergey Gerasimov; Licensed MSPL
+*
+* Lightweight dependency tracking library for JavaScript
+*/
+(function (rootObject, factory) {
+    if (typeof require === 'function' && typeof exports === 'object' && typeof module === 'object') {
         // CommonJS or Node
-        factory(window.exports);
-    } else if (typeof window.define === 'function' && window.define['amd']) {
+        factory(exports);
+    } else if (typeof define === 'function' && define['amd']) {
         // AMD anonymous module
-        window.define([], factory);
+        define([], factory);
     } else {
         // <script> tag: define the global `itDepends` object
         var exports = {};
         factory(exports);
-        window.itDepends = exports;
+        rootObject.itDepends = exports;
     }
-}(function (exports) {
+}(this, function (exports) {
     var nop = function () { };
     var trackers = [nop];
     var nextId = 0;

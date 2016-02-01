@@ -1,5 +1,5 @@
-﻿mocha.setup('bdd');
-var expect = chai.expect;
+﻿var expect = require('chai').expect;
+var itDepends = require('../out/build/itDepends.js');;
 
 describe('itDepends library', function () {
 

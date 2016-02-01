@@ -5,13 +5,23 @@
   "main": "itDepends.js",
   "dependencies": {},
   "devDependencies": {
-    "chai": "^3.5.0",
-    "mocha": "^2.4.5",
     "gulp": "~3.9.0",
+    "gulp-load-plugins": "~1.2.0",
+    "gulp-bump": "~1.0.0",
+    "gulp-mocha": "~2.2.0",
+    "gulp-rename": "~1.2.2",
+    "gulp-replace": "~0.5.4",
+    "gulp-uglify": "~1.5.1",
+    "mocha": "^2.4.5",
+    "mocha-lcov-reporter": "~1.0.0",
+    "blanket": "~1.2.1",
+    "coveralls": "~2.11.6",
+    "chai": "^3.5.0",
     "gulp-mocha-phantomjs": "~0.11.0"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+	"coverage": "mocha specs/index.js --require blanket -R html-cov > coverage.html"
   },
   "repository": {
     "type": "git",
@@ -29,5 +39,15 @@
   "bugs": {
     "url": "https://github.com/gerich-home/itDepends/issues"
   },
-  "homepage": "https://github.com/gerich-home/itDepends#readme"
+  "homepage": "https://github.com/gerich-home/itDepends#readme",
+  "config": {
+	  "blanket": {
+		"pattern": [
+		  "./out/build/itDepends.js"
+		],
+		"data-cover-never": [
+		  "node_modules"
+		]
+	  }
+	}
 }

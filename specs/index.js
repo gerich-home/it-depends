@@ -1,0 +1,1 @@
+﻿require('./supportsRequire.js');
