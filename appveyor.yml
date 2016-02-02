@@ -9,6 +9,6 @@ install:
   - npm install -g gulp
 
 test_script:
-  - gulp ci
+  - gulp continous-integration
 
 build: off
