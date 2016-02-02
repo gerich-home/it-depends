@@ -1,6 +1,6 @@
-environment:
-  nodejs_version: "0.10.25"
-  nodejs_version: "0.12"
+environment:matrix:
+  - nodejs_version: "0.10.25"
+  - nodejs_version: "0.12"
 
 install:
   - ps: Install-Product node $env:nodejs_version
