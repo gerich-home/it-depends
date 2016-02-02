@@ -2,6 +2,7 @@
 var plugins = require('gulp-load-plugins')();
 var mocha   = require('gulp-mocha');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
+var gutil = require('gulp-util');
 
 function updateVersionTask(importance) {
   return function() {
@@ -10,6 +11,12 @@ function updateVersionTask(importance) {
       .pipe(gulp.dest('./'));
   };
 };
+
+function mochaRepoter() {
+    return gutil.env.APPVEYOR === 'True'
+        ? 'mocha-appveyor'
+        : 'spec';
+}
 
 gulp.task('patch',   updateVersionTask('patch'))
 gulp.task('feature', updateVersionTask('minor'));
@@ -29,13 +36,17 @@ gulp.task('build', function () {
 
 gulp.task('test', ['build'], function () {
   return gulp.src('specs/index.js')
-             .pipe(mocha());
+             .pipe(mocha({
+                reporter: mochaRepoter()
+              }));
 });
 
 gulp.task('test-in-browser', ['build'], function () {
   return gulp
     .src('runner.html')
-    .pipe(mochaPhantomJS());
+    .pipe(mochaPhantomJS({
+                reporter: mochaRepoter()
+              }));
 });
 
 gulp.task('coverage', ['build'], function () {
