@@ -38,8 +38,6 @@ gulp.task('test-in-browser', ['build'], function () {
     .pipe(mochaPhantomJS());
 });
 
-gulp.task('tests', ['test', 'test-in-browser']);
-
 gulp.task('coverage', ['build'], function () {
   return gulp.src('specs/index.js')
              .pipe(mocha({
@@ -48,4 +46,6 @@ gulp.task('coverage', ['build'], function () {
               }));
 });
 
+gulp.task('tests', ['test', 'test-in-browser']);
+gulp.task('continous-integration', ['build', 'tests']);
 gulp.task('default', ['build']);
