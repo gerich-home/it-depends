@@ -2,3 +2,20 @@
 
 # itDepends
 Lightweight dependency tracking library for JavaScript
+
+### Install
+
+#### NodeJS
+
+```
+npm install git://github.com/gerich-home/itDepends.git
+```
+
+
+#### Browser
+
+TODO
+
+#### Usage
+
+TODO
