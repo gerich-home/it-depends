@@ -1,6 +1,6 @@
 {
   "name": "it-depends",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Lightweight dependency tracking library for JavaScript",
   "main": "itDepends.js",
   "dependencies": {},
@@ -21,7 +21,7 @@
   },
   "scripts": {
     "test": "mocha",
-	"coverage": "mocha specs/index.js --require blanket -R html-cov > coverage.html"
+    "coverage": "mocha specs/index.js --require blanket -R html-cov > coverage.html"
   },
   "repository": {
     "type": "git",
@@ -41,13 +41,13 @@
   },
   "homepage": "https://github.com/gerich-home/itDepends#readme",
   "config": {
-	  "blanket": {
-		"pattern": [
-		  "./out/build/itDepends.js"
-		],
-		"data-cover-never": [
-		  "node_modules"
-		]
-	  }
-	}
+    "blanket": {
+      "pattern": [
+        "./out/build/itDepends.js"
+      ],
+      "data-cover-never": [
+        "node_modules"
+      ]
+    }
+  }
 }

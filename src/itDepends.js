@@ -24,15 +24,16 @@
     var trackers = [nop];
     var nextId = 0;
 
-    function notifyCurrentTracker(tracked) {
-        trackers[trackers.length - 1](tracked);
+    function notifyCurrentTracker(tracked, dependencyId) {
+        trackers[trackers.length - 1](tracked, dependencyId);
     };
 
     exports.value = function (initialValue) {
+        var id = ++nextId;
         var currentValue = initialValue;
 
         var getValue = function () {
-            notifyCurrentTracker(self);
+            notifyCurrentTracker(self, id);
             return currentValue;
         };
 
@@ -59,6 +60,7 @@
 
         return self;
     };
+
     exports.computed = function (calculator) {
         var id = ++nextId;
         var currentValue;
@@ -72,8 +74,11 @@
         };
 
         var atLeastOneDependencyChanged = function (visitor) {
-            for (var i = 0; i < dependencies.length; i++) {
-                var dependency = dependencies[i];
+            for (var dependencyId in dependencies) {
+                if (!dependencies.hasOwnProperty(dependencyId))
+                    continue;
+
+                var dependency = dependencies[dependencyId];
 
                 if (dependency.trackedValue.changedSince(dependency.capturedVersion, visitor)) {
                     return true;
@@ -92,13 +97,16 @@
         var self = function () {
             if (needRecalc({})) {
                 needRecalcCache = false;
-                dependencies = [];
+                dependencies = {};
 
-                trackers.push(function (trackedValue) {
-                    dependencies.push({
+                trackers.push(function (trackedValue, dependencyId) {
+                    if (dependencies[dependencyId])
+                        return;
+
+                    dependencies[dependencyId] ={
                         trackedValue: trackedValue,
                         capturedVersion: trackedValue.valueVersion
-                    });
+                    };
                 });
 
                 try {
@@ -108,7 +116,7 @@
                 }
             }
 
-            notifyCurrentTracker(self);
+            notifyCurrentTracker(self, id);
 
             return currentValue;
         };
