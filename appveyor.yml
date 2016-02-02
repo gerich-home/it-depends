@@ -9,6 +9,6 @@ install:
   - npm install -g gulp
 
 test_script:
-  - gulp continous-integration
+  - gulp --appveyor=$(APPVEYOR) continous-integration
 
 build: off
