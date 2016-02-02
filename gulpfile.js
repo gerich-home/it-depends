@@ -13,7 +13,7 @@ function updateVersionTask(importance) {
 };
 
 function mochaRepoter() {
-    return gutil.env.appveyor === 'True'
+    return gutil.env.appveyor === 'true'
         ? 'mocha-appveyor'
         : 'spec';
 }

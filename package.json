@@ -2,7 +2,7 @@
   "name": "it-depends",
   "version": "1.0.1",
   "description": "Lightweight dependency tracking library for JavaScript",
-  "main": "itDepends.js",
+  "main": "./src/itDepends.js",
   "dependencies": {},
   "devDependencies": {
     "gulp": "~3.9.0",
