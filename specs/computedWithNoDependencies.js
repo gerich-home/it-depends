@@ -1,17 +1,16 @@
 ﻿var expect = require('chai').expect;
 var itDepends = require('../out/build/itDepends.js').itDepends;
 
-describe('computed', function () {
+describe('computed with no dependencies', function () {
 	var callCount;
     var computedValue;
-	var value = 10;
 	
 	beforeEach(function(){
 		callCount = 0;
 		
 		computedValue = itDepends.computed(function(){
 			callCount++;
-			return value;
+			return 'Bob';
 		});
 	});
 
@@ -21,13 +20,13 @@ describe('computed', function () {
 
   it('should calculate when requested', function () {
 	var actualValue = computedValue();
-	expect(actualValue).to.equal(value);
+	expect(actualValue).to.equal('Bob');
   });
 
   it('should calculate once when requested more than once', function () {
 	computedValue();
 	var actualValue = computedValue();
-	expect(actualValue).to.equal(value);
+	expect(actualValue).to.equal('Bob');
 	expect(callCount).to.equal(1);
   });
 });
