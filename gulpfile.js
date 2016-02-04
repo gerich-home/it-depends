@@ -25,12 +25,13 @@ gulp.task('release', updateVersionTask('major'));
 gulp.task('build', function () {
   var pkg = require('./package.json');
   var outputDir = './out/build';
+  var libraryName = 'it-depends';
 
-  return gulp.src('./src/itDepends.js')
+  return gulp.src('./src/' + libraryName + '.js')
       .pipe(plugins.replace('{{ version }}', pkg.version))
       .pipe(gulp.dest(outputDir))
       .pipe(plugins.uglify())
-      .pipe(plugins.rename('itDepends.min.js'))
+      .pipe(plugins.rename(libraryName + '.min.js'))
       .pipe(gulp.dest(outputDir));
 });
 

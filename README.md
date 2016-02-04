@@ -1,6 +1,6 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/d6clncv3kpeuemnr?svg=true)](https://ci.appveyor.com/project/gerich-home/itdepends)
+[![Build status](https://ci.appveyor.com/api/projects/status/dufdv2sefowej3mq?svg=true)](https://ci.appveyor.com/project/gerich-home/it-depends)
 
-# itDepends
+# it-depends
 Lightweight dependency tracking library for JavaScript
 
 ### Install
@@ -8,7 +8,7 @@ Lightweight dependency tracking library for JavaScript
 #### NodeJS
 
 ```
-npm install git://github.com/gerich-home/itDepends.git
+npm install git://github.com/gerich-home/it-depends.git
 ```
 
 

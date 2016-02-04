@@ -2,7 +2,10 @@
   "name": "it-depends",
   "version": "1.0.1",
   "description": "Lightweight dependency tracking library for JavaScript",
-  "main": "./src/itDepends.js",
+  "files": [
+    "out/build/it-depends.min.js"
+  ],
+  "main": "out/build/it-depends.min.js",
   "dependencies": {},
   "devDependencies": {
     "gulp": "~3.9.0",
@@ -22,12 +25,10 @@
     "mocha-appveyor-reporter": "~0.1.0"
   },
   "scripts": {
-    "test": "mocha",
-    "coverage": "mocha specs/index.js --require blanket -R html-cov > coverage.html"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gerich-home/itDepends.git"
+    "url": "git+https://github.com/gerich-home/it-depends.git"
   },
   "keywords": [
     "dependency",
@@ -39,17 +40,7 @@
   "author": "Sergey Gerasimov",
   "license": "SEE LICENSE IN license.md",
   "bugs": {
-    "url": "https://github.com/gerich-home/itDepends/issues"
+    "url": "https://github.com/gerich-home/it-depends/issues"
   },
-  "homepage": "https://github.com/gerich-home/itDepends#readme",
-  "config": {
-    "blanket": {
-      "pattern": [
-        "./out/build/itDepends.js"
-      ],
-      "data-cover-never": [
-        "node_modules"
-      ]
-    }
-  }
+  "homepage": "https://github.com/gerich-home/it-depends#readme"
 }
