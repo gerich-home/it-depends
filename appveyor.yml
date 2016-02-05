@@ -12,3 +12,7 @@ test_script:
   - gulp --appveyor=true continous-integration
 
 build: off
+
+artifacts:
+  - path: 'out\build\*.js'
+    name: it-depends
