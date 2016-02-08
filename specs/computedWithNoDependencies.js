@@ -1,5 +1,5 @@
 ﻿var expect = require('chai').expect;
-var itDepends = require('../out/build/it-depends.js').itDepends;
+var itDepends = require('../src/it-depends.js').itDepends;
 
 describe('computed with no dependencies', function () {
 	var callCount;

@@ -1,5 +1,5 @@
 ﻿var expect = require('chai').expect;
-var itDepends = require('../out/build/it-depends.js');
+var itDepends = require('../src/it-depends.js').itDepends;
 
 describe('itDepends library', function () {
 

@@ -3,9 +3,9 @@
   "version": "1.0.1",
   "description": "Lightweight dependency tracking library for JavaScript",
   "files": [
-    "out/build/it-depends.min.js"
+    "src"
   ],
-  "main": "out/build/it-depends.min.js",
+  "main": "src/it-depends.js",
   "dependencies": {},
   "devDependencies": {
     "gulp": "~3.9.0",
@@ -24,8 +24,7 @@
     "gulp-util": "~3.0.7",
     "mocha-appveyor-reporter": "~0.1.0"
   },
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gerich-home/it-depends.git"
