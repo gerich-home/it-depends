@@ -50,7 +50,7 @@ npm install git://github.com/gerich-home/it-depends.git
 ```
 
 In your application include the module and use it:
-```
+```javascript
 var itDepends = require('it-depends').itDepends;
 
 // your code goes here:
@@ -65,7 +65,7 @@ Download the [latest release](https://github.com/gerich-home/it-depends/releases
 Place where it is suitable according to your AMD/RequireJS configuration
 
 Use it as a dependency of AMD module:
-```
+```javascript
 define(['it-depends'], function(itDepends) {
     // your code goes here:
     var firstName = itDepends.value('James');
@@ -80,19 +80,19 @@ Download the [latest release](https://github.com/gerich-home/it-depends/releases
 Place where it is suitable
 
 Include it into the page:
-```
+```html
 <script src="js/ext/it-depends.js"></script>
 <script src="js/your-application.js"></script>
 ```
 
 or
-```
+```html
 <script src="js/ext/it-depends.min.js"></script>
 <script src="js/your-application.js"></script>
 ```
 
 You will be able to use `itDepends` global variable in your-application.js:
-```
+```javascript
 // your code goes here:
 var firstName = itDepends.value('James');
 ...
@@ -111,24 +111,21 @@ Creates observable value object
 the `observable` value object
 
 ### `observableValue()`
-
 Reads the current value of observable value object
 
 #### Returns:
-    the current value of observable value object
+the current value of observable value object
 
 ### `observableValue(newValue)`
-
 Updates the current value of observable value object
 
 #### Parameters:
 * `newValue` *(mandatory, any value)* - the new value to write to observale value object
 
 #### Returns:
-    void
+*void*
 
 ### `itDepends.computed(calculator)`
-
 Creates computed value object
 
 #### Parameters:
@@ -138,15 +135,14 @@ Creates computed value object
 the `computed` value object
 
 ### `computedValue()`
-
 Reads the current value of computed value object. `calculator` will be called if it is the first call or if a change was made to some of the dependencies (values/computeds) called from calculator previous time. Otherwise the cached current value will be returned.
 During the call dependencies (values/computeds) used in the calculator will be recorded and stored in the list of dependencies.
 
 #### Returns:
-    the current value of computed value object
+the current value of computed value object
     
 ## Example code
-```
+```javascript
 var firstName = itDepends.value('James');
 var lastName  = itDepends.value('Bond');
 
@@ -171,6 +167,25 @@ There are lot of things you can help me with. Here are few of them:
 * Help me with publishing to different repositories, automate it: npm, Bower, NuGet
 * Move to TypeScript / write typings
 * Make library known to publicity
+
+### Contribution Guide
+
+Development environment prerequisites:
+
+1. [NodeJS](https://nodejs.org/), [npm](https://www.npmjs.com/)
+2. [Gulp](http://gulpjs.com/). Install with: `npm install --global gulp-cli`
+
+Workflow:
+
+1. Create a fork
+2. Clone your git repository
+3. Run `npm install`
+5. Run `gulp test`, they should be green
+4. Make a code change
+5. Run `gulp test`, they should be green again, fix if failed
+6. Commit, push
+7. Create PR (pull request)
+
 
 ## Author
 [Sergey Gerasimov](mailto:gerich.home@gmail.com)
