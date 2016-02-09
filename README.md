@@ -98,7 +98,54 @@ var firstName = itDepends.value('James');
 ...
 ```
 
-##### Example code
+## API
+
+### `itDepends.value(initialValue)`
+
+Creates observable value object
+
+#### Parameters:
+* `initialValue` *(optional, any value, undefined by default)* - the value to be stored in the observable when created
+
+#### Returns:
+the `observable` value object
+
+### `observableValue()`
+
+Reads the current value of observable value object
+
+#### Returns:
+    the current value of observable value object
+
+### `observableValue(newValue)`
+
+Updates the current value of observable value object
+
+#### Parameters:
+* `newValue` *(mandatory, any value)* - the new value to write to observale value object
+
+#### Returns:
+    void
+
+### `itDepends.computed(calculator)`
+
+Creates computed value object
+
+#### Parameters:
+* `calculator` *(mandatory, function (void) -> any )* - the function that will be called later to (re)calculate the value of computed. Gets called when you request the value for the first time, or when you request the value when some of dependencies (values/computeds) was changed. Should return(calculate) the current value of the computed value object. **Must not** have side-effects.
+
+#### Returns:
+the `computed` value object
+
+### `computedValue()`
+
+Reads the current value of computed value object. `calculator` will be called if it is the first call or if a change was made to some of the dependencies (values/computeds) called from calculator previous time. Otherwise the cached current value will be returned.
+During the call dependencies (values/computeds) used in the calculator will be recorded and stored in the list of dependencies.
+
+#### Returns:
+    the current value of computed value object
+    
+## Example code
 ```
 var firstName = itDepends.value('James');
 var lastName  = itDepends.value('Bond');
