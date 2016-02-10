@@ -34,12 +34,12 @@ I created the library when I was refactoring one of complex screens in an [Angul
 
 The corresponding UI code contained logic to handle the checked/unchecked state of checkboxes mixed with the quite complex business rules for calculating whether the checkbox is enabled or disabled (based on the checked/unchecked state).
 
-The code was slow because for any (even unrelated to checkboxes) change on UI Angular restarted `$digest` loop and requeried the checked and enabled states.
+The code was slow because for any (even unrelated to checkboxes) change on UI Angular restarted `$digest` loop and required the checked and enabled states.
 I preferred to do not use `$scope.$watch` to update values on change in checked/unchecked state, because I did not want to clutter my scope with implementation details of intermediate values, I wanted to always have some exact state (without intermediate transition states, when some values were updated and some of them - not) and I did not want to manage dependencies manually.
 
-I refactored code to extract these calculation functions into small pieces, implcitly declared dependencies between them, so the framework became able to handle both dependencies and caching for me.
+I refactored code to extract these calculation functions into small pieces, implicitly declared dependencies between them, so the framework became able to handle both dependencies and caching for me.
 
-After that I allowed AngularJS to query my `$scope` so that it could get actual values from observale values and cached computed. 
+After that I allowed AngularJS to query my `$scope` so that it could get actual values from observable values and cached computed. 
 
 ## Installation and usage
 
@@ -120,7 +120,7 @@ the current value of observable value object
 Updates the current value of observable value object
 
 #### Parameters:
-* `newValue` *(mandatory, any value)* - the new value to write to observale value object
+* `newValue` *(mandatory, any value)* - the new value to write to observable value object
 
 #### Returns:
 *void*
