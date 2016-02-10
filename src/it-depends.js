@@ -24,52 +24,44 @@
     var trackers = [nop];
     var nextId = 0;
 
-    function notifyCurrentTracker(tracked, dependencyId) {
-        trackers[trackers.length - 1](tracked, dependencyId);
+    function notifyCurrentTracker(descriptor) {
+        trackers[trackers.length - 1](descriptor);
     };
 
     exports.value = function (initialValue) {
-        var id = ++nextId;
         var currentValue = initialValue;
 
-        var getValue = function () {
-            notifyCurrentTracker(self, id);
+        var self = function () {
+            notifyCurrentTracker(descriptor);
             return currentValue;
         };
-
-        var setValue = function (newValue) {
+		
+		self.write = function (newValue){
             if (currentValue !== newValue) {
                 currentValue = newValue;
-                self.valueVersion++;
+                descriptor.valueVersion++;
             }
-        };
+		};
 
-        var self = function () {
-            if (arguments.length === 0) {
-                return getValue();
-            }
-
-            setValue(arguments[0]);
-        };
-
-        self.changedSince = function (version) {
-            return self.valueVersion > version;
-        };
-
-        self.valueVersion = 0;
+		var descriptor = {
+			changedSince: function (version) {
+				return descriptor.valueVersion > version;
+			},
+			valueVersion: 0,
+			id: ++nextId
+		};
 
         return self;
     };
 
     exports.computed = function (calculator) {
-        var id = ++nextId;
         var currentValue;
         var dependencies;
 
         var setValue = function (newValue) {
             if (currentValue !== newValue) {
                 currentValue = newValue;
-                self.valueVersion++;
+                descriptor.valueVersion++;
             }
         };
 
@@ -116,26 +108,28 @@
                 }
             }
 
-            notifyCurrentTracker(self, id);
+            notifyCurrentTracker(descriptor);
 
             return currentValue;
         };
 
-        self.changedSince = function (version, visitor) {
-            if (visitor[id]) {
-                return false;
-            }
+		var descriptor = {
+			changedSince: function (version, visitor) {
+				if (visitor[descriptor.id]) {
+					return false;
+				}
 
-            visitor[id] = true;
+				visitor[descriptor.id] = true;
 
-            if (self.valueVersion > version) {
-                return true;
-            }
+				if (descriptor.valueVersion > version) {
+					return true;
+				}
 
-            return needRecalc(visitor);
-        };
-
-        self.valueVersion = 0;
+				return needRecalc(visitor);
+			},
+			valueVersion: 0,
+			id: ++nextId
+		};
 
         return self;
     };

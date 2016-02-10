@@ -25,46 +25,83 @@ describe('computed with computed dependency', function () {
 		expect(callCount).to.equal(0);
 	});
 
-	it('should not calculate when other computed is calculated', function () {
-		var mrBob = otherComputed();
+	it('should not calculate when computed dependency was calculated', function () {
+		otherComputed();
 		expect(callCount).to.equal(0);
 	});
 
-	it('should not calculate when other computed value changes', function () {
-		otherValue('Jack');
-		var mrJack = otherComputed();
+	it('should not calculate when computed dependency was changed and recalculated', function () {
+		otherValue.write('Jack');
+		otherComputed();
 		expect(callCount).to.equal(0);
 	});
 
 	it('should calculate when requested', function () {
-		var helloMrBob = computedValue();
-		expect(helloMrBob).to.equal('Hello, mr. Bob');
+		var actualValue = computedValue();
+		expect(actualValue).to.equal('Hello, mr. Bob');
 		expect(callCount).to.equal(1);
 	});
 	
-	context('when was calculated once', function () {
+	context('after was calculated once', function () {
 		beforeEach(function(){
-			var helloMrBob = computedValue();
+			computedValue();
+		});
+
+		it('should not calculate second time if computed dependency was not changed', function () {
+			var actualValue = computedValue();
+			expect(actualValue).to.equal('Hello, mr. Bob');
 			expect(callCount).to.equal(1);
 		});
 
-		it('should not calculate when other computed is calculated', function () {
-			otherValue('Jack');
-			var mrJack = otherComputed();
+		it('should not calculate when computed dependency was calculated', function () {
+			otherComputed();
 			expect(callCount).to.equal(1);
 		});
 
-		it('should not calculate second time when no dependencies were changes', function () {
-			var helloMrBob = computedValue();
-			expect(helloMrBob).to.equal('Hello, mr. Bob');
-			expect(callCount).to.equal(1);
+		context('after computed dependency was changed', function () {
+			beforeEach(function(){
+				otherValue.write('Jack');
+			});
+			
+			it('should not recalculate after computed dependency was recalculated', function () {
+				otherComputed();
+				expect(callCount).to.equal(1);
+			});
+
+			it('should calculate when requested', function () {
+				var actualValue = computedValue();
+				expect(actualValue).to.equal('Hello, mr. Jack');
+				expect(callCount).to.equal(2);
+			});
+		});
+	});
+	
+	context('after computed dependency was changed', function () {
+		beforeEach(function(){
+			otherValue.write('Jack');
+		});
+		
+		it('should not recalculate after computed dependency was recalculated', function () {
+			otherComputed();
+			expect(callCount).to.equal(0);
 		});
 
-		it('should calculate second time when no dependencies were changes', function () {
-			otherValue('Jack');
-			var helloMrJack = computedValue();
-			expect(helloMrJack).to.equal('Hello, mr. Jack');
-			expect(callCount).to.equal(2);
+		it('should calculate when requested', function () {
+			var actualValue = computedValue();
+			expect(actualValue).to.equal('Hello, mr. Jack');
+			expect(callCount).to.equal(1);
+		});
+	
+		context('after was calculated once', function () {
+			beforeEach(function(){
+				computedValue();
+			});
+
+			it('should not calculate second time if computed dependency was not changed', function () {
+				var actualValue = computedValue();
+				expect(actualValue).to.equal('Hello, mr. Jack');
+				expect(callCount).to.equal(1);
+			});
 		});
 	});
 });

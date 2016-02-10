@@ -116,7 +116,7 @@ Reads the current value of observable value object
 #### Returns:
 the current value of observable value object
 
-### `observableValue(newValue)`
+### `observableValue.write(newValue)`
 Updates the current value of observable value object
 
 #### Parameters:
@@ -152,7 +152,7 @@ var fullName = itDepends.computed(function(){
 
 console.log(fullName()); // Hello, James Bond
 
-firstName('Jack');
+firstName.write('Jack');
 
 console.log(fullName()); // Hello, Jack Bond
 ```

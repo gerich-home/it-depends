@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 var itDepends = require('../src/it-depends.js').itDepends;
 
-describe('computed with value dependency', function () {
+describe('computed with single value dependency', function () {
 	var callCount;
 	var observableValue;
 	var computedValue;
@@ -26,41 +26,62 @@ describe('computed with value dependency', function () {
 		expect(actualValue).to.equal('Hello, Bob');
 	});
 
-	context('when was calculated once', function () {
+	context('after was calculated once', function () {
 		beforeEach(function(){
 			computedValue();
-			expect(callCount).to.equal(1);
 		});
 
-		it('should not calculate second time if dependency value was not changed', function () {
+		it('should not calculate second time if value dependency was not changed', function () {
 			var actualValue = computedValue();
 			expect(actualValue).to.equal('Hello, Bob');
 			expect(callCount).to.equal(1);
 		});
+		
+		context('after value dependency was changed', function () {
+			beforeEach(function(){
+				observableValue.write('Jack');
+			});
+
+			it('should not recalculate immediately', function () {
+				expect(callCount).to.equal(1);
+			});
+
+			it('should recalculate when requested', function () {
+				var actualValue = computedValue();
+				expect(actualValue).to.equal('Hello, Jack');
+				expect(callCount).to.equal(2);
+			});
+		});
 	});
 
-	context('after dependency value was changed', function () {
+	context('after value dependency was changed', function () {
 		beforeEach(function(){
-			observableValue('Jack');
+			observableValue.write('Jack');
 		});
 
-		it('should not calculate', function () {
+		it('should not recalculate immediately', function () {
 			expect(callCount).to.equal(0);
 		});
 
-		it('should calculate when requested', function () {
+		it('should recalculate when requested', function () {
 			var actualValue = computedValue();
 			expect(actualValue).to.equal('Hello, Jack');
 			expect(callCount).to.equal(1);
 		});
+		
+		context('after was recalculated', function () {
+			beforeEach(function(){
+				computedValue();
+			});
 
-		it('should calculate once when requested more than once', function () {
-			computedValue();
-			var actualValue = computedValue();
-			expect(actualValue).to.equal('Hello, Jack');
-			expect(callCount).to.equal(1);
+			it('should not calculate second time if value dependency was not changed', function () {
+				var actualValue = computedValue();
+				expect(actualValue).to.equal('Hello, Jack');
+				expect(callCount).to.equal(1);
+			});
+			
 		});
-
+		
 	});
 
 });

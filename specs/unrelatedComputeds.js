@@ -26,30 +26,41 @@ describe('computed unrelated to other computed and value', function () {
 	});
 
 	it('should not calculate when other computed is calculated', function () {
-		var helloBob = unrelatedComputed();
+		unrelatedComputed();
 		expect(callCount).to.equal(0);
 	});
 
 	it('should not calculate when other computed value changes', function () {
-		unrelatedValue('Jack');
-		var helloJack = unrelatedComputed();
+		unrelatedValue.write('Jack');
+		unrelatedComputed();
 		expect(callCount).to.equal(0);
+	});
+
+	it('should calculate when requested', function () {
+		var actualValue = computedValue();
+		expect(actualValue).to.equal('Hello');
+		expect(callCount).to.equal(1);
 	});
 	
 	context('when was calculated once', function () {
 		beforeEach(function(){
-			var hello = computedValue();
-			expect(callCount).to.equal(1);
+			computedValue();
 		});
 
 		it('should not calculate when other computed is calculated', function () {
-			var helloBob = unrelatedComputed();
+			unrelatedComputed();
 			expect(callCount).to.equal(1);
 		});
 
 		it('should not calculate when other computed value changes', function () {
-			unrelatedValue('Jack');
-			var helloJack = unrelatedComputed();
+			unrelatedValue.write('Jack');
+			unrelatedComputed();
+			expect(callCount).to.equal(1);
+		});
+
+		it('should not calculate second time', function () {
+			var actualValue = computedValue();
+			expect(actualValue).to.equal('Hello');
 			expect(callCount).to.equal(1);
 		});
 	});

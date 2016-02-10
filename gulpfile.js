@@ -16,7 +16,7 @@ function mochaRepoter() {
     return gutil.env.appveyor === 'true'
         ? 'mocha-appveyor-reporter'
         : 'spec';
-}
+};
 
 gulp.task('patch',   updateVersionTask('patch'))
 gulp.task('feature', updateVersionTask('minor'));
@@ -35,7 +35,7 @@ gulp.task('build', function () {
       .pipe(gulp.dest(outputDir));
 });
 
-gulp.task('test', ['build'], function () {
+gulp.task('test', [], function () {
   return gulp.src('specs/index.js')
              .pipe(mocha({
                 reporter: mochaRepoter()
@@ -50,7 +50,7 @@ gulp.task('test-in-browser', ['build'], function () {
               }));
 });
 
-gulp.task('coverage', ['build'], function () {
+gulp.task('coverage', [], function () {
   return gulp.src('specs/index.js')
              .pipe(mocha({
                 reporter: 'html-cov',
