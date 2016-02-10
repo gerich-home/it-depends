@@ -18,7 +18,7 @@ artifacts:
     name: it-depends
 
 deploy:
-  release: 'it-depends $(APPVEYOR_REPO_TAG_NAME)'
+  tag: '$(APPVEYOR_REPO_TAG_NAME)'
   provider: GitHub
   prerelease: true
   auth_token:
