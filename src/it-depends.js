@@ -137,7 +137,7 @@
     exports.promiseValue = function (promise, initialValue) {
         var currentValue = exports.value(initialValue);
 
-        promise.then(currentValue);
+        promise.then(currentValue.write);
 
         return exports.computed(currentValue);
     };

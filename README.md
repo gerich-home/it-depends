@@ -140,7 +140,25 @@ During the call dependencies (values/computeds) used in the calculator will be r
 
 #### Returns:
 the current value of computed value object
-    
+
+### `itDepends.promiseValue(promise, initialValue)`
+
+Creates promise value wrapper object
+
+#### Parameters:
+* `promise` *(mandatory, [Promise](https://promisesaplus.com/#point-21))* - the promise object that is the source of the value
+* `initialValue` *(optional, any value, undefined by default)* - the value to be stored in the promise value when created
+
+#### Returns:
+the `promise` value object filled with the `initialValue` or `undefined` if none specified.
+Depending on the concrete Promise implementation can be filled with the value of a Promise if it was resolved already.
+
+### `promiseValue()`
+Reads the current value of promise value wrapper object.
+
+#### Returns:
+the current value of promise value wrapper object: `initialValue` of an object or the value that was used to resolve the Promise
+
 ## Example code
 ```javascript
 var firstName = itDepends.value('James');
