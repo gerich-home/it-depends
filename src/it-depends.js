@@ -1,6 +1,6 @@
 ﻿'use strict';
 /*!
-* itDepends - v{{ version }}
+* it-depends - v{{ version }}
 * https://github.com/gerich-home/itDepends
 * Copyright (c) 2016 Sergey Gerasimov; Licensed MSPL
 *
@@ -72,7 +72,7 @@
 
                 var dependency = dependencies[dependencyId];
 
-                if (dependency.trackedValue.changedSince(dependency.capturedVersion, visitor)) {
+                if (dependency.descriptor.changedSince(dependency.capturedVersion, visitor)) {
                     return true;
                 }
             }
@@ -91,13 +91,13 @@
                 needRecalcCache = false;
                 dependencies = {};
 
-                trackers.push(function (trackedValue, dependencyId) {
-                    if (dependencies[dependencyId])
+                trackers.push(function (dependencyDescriptor) {
+                    if (dependencies[dependencyDescriptor.id])
                         return;
 
-                    dependencies[dependencyId] ={
-                        trackedValue: trackedValue,
-                        capturedVersion: trackedValue.valueVersion
+                    dependencies[dependencyDescriptor.id] ={
+                        descriptor: dependencyDescriptor,
+                        capturedVersion: dependencyDescriptor.valueVersion
                     };
                 });
 

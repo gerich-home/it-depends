@@ -24,6 +24,7 @@ describe('computed with single value dependency', function () {
 	it('should calculate when requested', function () {
 		var actualValue = computedValue();
 		expect(actualValue).to.equal('Hello, Bob');
+		expect(callCount).to.equal(1);
 	});
 
 	context('after was calculated once', function () {
