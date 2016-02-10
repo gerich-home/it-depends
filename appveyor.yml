@@ -20,7 +20,6 @@ artifacts:
 deploy:
   tag: '$(APPVEYOR_REPO_TAG_NAME)'
   provider: GitHub
-  prerelease: true
   auth_token:
     secure: iIQYZTIjnJwRMu4NGFO9iDWVxiULK/6RfSWY6R9Z8W7daJPdGQGMBqblEcpYa9xZ
   artifact: it-depends
