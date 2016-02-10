@@ -16,3 +16,14 @@ build: off
 artifacts:
   - path: 'out\build\*.js'
     name: it-depends
+
+deploy:
+  release: 'it-depends $(APPVEYOR_REPO_TAG_NAME)'
+  provider: GitHub
+  prerelease: true
+  auth_token:
+    secure: iIQYZTIjnJwRMu4NGFO9iDWVxiULK/6RfSWY6R9Z8W7daJPdGQGMBqblEcpYa9xZ
+  artifact: it-depends
+  on:
+    branch: master
+    appveyor_repo_tag: true
