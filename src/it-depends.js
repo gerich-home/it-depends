@@ -50,9 +50,9 @@
 
     exports.computed = function(calculator) {
         var currentValue;
-        var dependencies = {};
+        var dependencies;
         var id = ++nextId;
-        var lastReadVersion = 0;
+        var lastReadVersion = -1;
 
         var atLeastOneDependencyChanged = function() {
             for (var dependencyId in dependencies) {
@@ -69,10 +69,10 @@
             return false;
         };
 
-        var needRecalcCache = true;
+        var needRecalcCache;
         var needRecalc = function() {
             if (lastReadVersion !== lastWriteVersion) {
-                needRecalcCache = atLeastOneDependencyChanged();
+                needRecalcCache = !dependencies || atLeastOneDependencyChanged();
                 lastReadVersion = lastWriteVersion;
             }
 
