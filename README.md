@@ -1,4 +1,5 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/dufdv2sefowej3mq?svg=true)](https://ci.appveyor.com/project/gerich-home/it-depends)
+[![npm version](https://badge.fury.io/js/it-depends.svg)](https://badge.fury.io/js/it-depends)
 
 # it-depends
 Lightweight dependency tracking / caching library for JavaScript
@@ -46,7 +47,7 @@ After that I allowed AngularJS to query my `$scope` so that it could get actual 
 #### [NodeJS](https://nodejs.org/)
 
 ```
-npm install git://github.com/gerich-home/it-depends.git
+npm install it-depends
 ```
 
 In your application include the module and use it:
