@@ -1,7 +1,7 @@
 ﻿'use strict';
 /*!
 * it-depends - v{{ version }}
-* https://github.com/gerich-home/itDepends
+* https://github.com/gerich-home/it-depends
 * Copyright (c) 2016 Sergey Gerasimov; Licensed MSPL
 *
 * Lightweight dependency tracking library for JavaScript
