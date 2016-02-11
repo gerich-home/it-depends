@@ -6,7 +6,7 @@
 *
 * Lightweight dependency tracking library for JavaScript
 */
-(function (rootObject, factory) {
+(function(rootObject, factory) {
     if (typeof require === 'function' && typeof exports === 'object' && typeof module === 'object') {
         // CommonJS or Node
         factory(exports);
@@ -19,60 +19,49 @@
         factory(exports);
         rootObject.itDepends = exports;
     }
-}(this, function (exports) {
-    var nop = function () { };
+}(this, function(exports) {
+    var nop = function() {};
     var trackers = [nop];
     var nextId = 0;
+    var lastWriteVersion = 0;
 
-    function notifyCurrentTracker(descriptor) {
-        trackers[trackers.length - 1](descriptor);
+    function notifyCurrentTracker(id, observableValue, currentValue) {
+        trackers[trackers.length - 1](id, observableValue, currentValue);
     };
 
-    exports.value = function (initialValue) {
+    exports.value = function(initialValue) {
         var currentValue = initialValue;
+        var id = ++nextId;
 
-        var self = function () {
-            notifyCurrentTracker(descriptor);
+        var self = function() {
+            notifyCurrentTracker(id, self, currentValue);
             return currentValue;
         };
-		
-		self.write = function (newValue){
+
+        self.write = function(newValue) {
             if (currentValue !== newValue) {
                 currentValue = newValue;
-                descriptor.valueVersion++;
+                lastWriteVersion++;
             }
-		};
-
-		var descriptor = {
-			changedSince: function (version) {
-				return descriptor.valueVersion > version;
-			},
-			valueVersion: 0,
-			id: ++nextId
-		};
+        };
 
         return self;
     };
 
-    exports.computed = function (calculator) {
+    exports.computed = function(calculator) {
         var currentValue;
-        var dependencies;
+        var dependencies = {};
+        var id = ++nextId;
+        var lastReadVersion = 0;
 
-        var setValue = function (newValue) {
-            if (currentValue !== newValue) {
-                currentValue = newValue;
-                descriptor.valueVersion++;
-            }
-        };
-
-        var atLeastOneDependencyChanged = function (visitor) {
+        var atLeastOneDependencyChanged = function() {
             for (var dependencyId in dependencies) {
                 if (!dependencies.hasOwnProperty(dependencyId))
                     continue;
 
                 var dependency = dependencies[dependencyId];
 
-                if (dependency.descriptor.changedSince(dependency.capturedVersion, visitor)) {
+                if (dependency.observableValue() !== dependency.capturedValue) {
                     return true;
                 }
             }
@@ -80,61 +69,48 @@
             return false;
         };
 
-        var needRecalcCache = false;
-        var needRecalc = function (visitor) {
-            return needRecalcCache ||
-            (needRecalcCache = !dependencies || atLeastOneDependencyChanged(visitor));
+        var needRecalcCache = true;
+        var needRecalc = function() {
+            if (lastReadVersion !== lastWriteVersion) {
+                needRecalcCache = atLeastOneDependencyChanged();
+                lastReadVersion = lastWriteVersion;
+            }
+
+            return needRecalcCache;
         };
 
-        var self = function () {
-            if (needRecalc({})) {
-                needRecalcCache = false;
+        var self = function() {
+            if (needRecalc()) {
                 dependencies = {};
 
-                trackers.push(function (dependencyDescriptor) {
-                    if (dependencies[dependencyDescriptor.id])
+                trackers.push(function(dependencyId, observableValue, capturedValue) {
+                    if (dependencies[dependencyId])
                         return;
 
-                    dependencies[dependencyDescriptor.id] ={
-                        descriptor: dependencyDescriptor,
-                        capturedVersion: dependencyDescriptor.valueVersion
+                    dependencies[dependencyId] = {
+                        observableValue: observableValue,
+                        capturedValue: capturedValue
                     };
                 });
 
                 try {
-                    setValue(calculator());
+                    currentValue = calculator();
                 } finally {
                     trackers.pop();
                 }
+
+                needRecalcCache = false;
             }
 
-            notifyCurrentTracker(descriptor);
+            notifyCurrentTracker(id, self, currentValue);
 
             return currentValue;
         };
 
-		var descriptor = {
-			changedSince: function (version, visitor) {
-				if (visitor[descriptor.id]) {
-					return false;
-				}
-
-				visitor[descriptor.id] = true;
-
-				if (descriptor.valueVersion > version) {
-					return true;
-				}
-
-				return needRecalc(visitor);
-			},
-			valueVersion: 0,
-			id: ++nextId
-		};
-
         return self;
     };
 
-    exports.promiseValue = function (promise, initialValue) {
+    exports.promiseValue = function(promise, initialValue) {
         var currentValue = exports.value(initialValue);
 
         promise.then(currentValue.write);
