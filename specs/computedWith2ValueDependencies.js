@@ -68,6 +68,18 @@ describe('computed with 2 value dependencies', function () {
 				
 			});
 
+			context('after the first value dependency was changed back immediatelly', function () {
+				beforeEach(function(){
+					observableValue1.write('Hello');
+				});
+
+				it('should not recalculate when requested', function () {
+					var actualValue = computedValue();
+					expect(actualValue).to.equal('Hello, Bob');
+					expect(callCount).to.equal(1);
+				});
+			});
+
 			context('after the second value dependency was changed', function () {
 				beforeEach(function(){
 					observableValue2.write('Jack');
@@ -124,6 +136,18 @@ describe('computed with 2 value dependencies', function () {
 					expect(callCount).to.equal(2);
 				});
 				
+			});
+
+			context('after the second value dependency was changed back immediatelly', function () {
+				beforeEach(function(){
+					observableValue2.write('Bob');
+				});
+
+				it('should not recalculate when requested', function () {
+					var actualValue = computedValue();
+					expect(actualValue).to.equal('Hello, Bob');
+					expect(callCount).to.equal(1);
+				});
 			});
 			
 			context('after the first value dependency was changed', function () {

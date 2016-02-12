@@ -52,6 +52,18 @@ describe('computed with single value dependency', function () {
 				expect(actualValue).to.equal('Hello, Jack');
 				expect(callCount).to.equal(2);
 			});
+
+			context('after value dependency was changed back immediatelly', function () {
+				beforeEach(function(){
+					observableValue.write('Bob');
+				});
+
+				it('should not recalculate when requested', function () {
+					var actualValue = computedValue();
+					expect(actualValue).to.equal('Hello, Bob');
+					expect(callCount).to.equal(1);
+				});
+			});
 		});
 	});
 

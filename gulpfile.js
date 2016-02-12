@@ -51,7 +51,7 @@ gulp.task('test-in-browser', ['build'], function () {
 });
 
 gulp.task('coverage', [], function () {
-  return gulp.src('specs/index.js')
+  return gulp.src('specs')
              .pipe(mocha({
                 reporter: 'html-cov',
                 require: ['blanket']

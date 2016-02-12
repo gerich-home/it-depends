@@ -63,6 +63,19 @@ describe('computed with computed dependency', function () {
 				otherValue.write('Jack');
 			});
 			
+			context('after computed dependency was recalculated and changed back immediatelly', function () {
+				beforeEach(function(){
+					otherComputed();
+					otherValue.write('Bob');
+				});
+
+				it('should not recalculate when requested', function () {
+					var actualValue = computedValue();
+					expect(actualValue).to.equal('Hello, mr. Bob');
+					expect(callCount).to.equal(1);
+				});
+			});
+			
 			it('should not recalculate after computed dependency was recalculated', function () {
 				otherComputed();
 				expect(callCount).to.equal(1);
