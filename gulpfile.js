@@ -45,7 +45,7 @@ gulp.task('test', [], function() {
 function integrationTestTask(name, extension, runner) {
 	gulp.task('integration-test-' + name, ['build'], function() {
 		return gulp
-			.src('specs/integration/' + name + '.' + extension)
+			.src('integration-tests/' + name + '/index.' + extension)
 			.pipe(runner({
 				reporter: mochaRepoter()
 			}));
