@@ -88,12 +88,6 @@ Include it into the page:
 <script src="js/your-application.js"></script>
 ```
 
-or
-```html
-<script src="js/ext/it-depends.min.js"></script>
-<script src="js/your-application.js"></script>
-```
-
 You will be able to use `itDepends` global variable in your-application.js:
 ```javascript
 // your code goes here:
