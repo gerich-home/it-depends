@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>itDepends specs</title>
+    <link rel="stylesheet" href="../../node_modules/mocha/mocha.css" />
+  </head>
+  <body>
+    <!-- 1. Placeholder node that will contain the test results -->
+    <div id="mocha"></div>
+
+    <!-- 2. Test libraries -->
+    <script src="../../node_modules/chai/chai.js"></script>
+    <script src="../../node_modules/mocha/mocha.js"></script>
+
+    <!-- 3. Library dependencies -->
+    <script src="../../node_modules/requirejs/require.js"></script>
+	
+    <!-- 4. Tests -->
+    <script src="requirejs.js"></script>
+
+    <!-- 6. Run tests -->
+    <script type="text/javascript">
+		requirejs.config({
+			baseUrl: '../../out/build'
+		});
+	
+        mocha.run();
+    </script>
+  </body>
+</html>
