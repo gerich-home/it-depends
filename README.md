@@ -162,7 +162,7 @@ Reads the current value of promise value wrapper object.
 #### Returns:
 the current value of promise value wrapper object: `initialValue` of an object or the value that was used to resolve the Promise
 
-## Example code
+## Example code ([Try it in Tonic](https://tonicdev.com/gerichhome/it-depends))
 ```javascript
 var firstName = itDepends.value('James');
 var lastName  = itDepends.value('Bond');
