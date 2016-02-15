@@ -54,7 +54,7 @@ npm install it-depends
 
 In your application include the module and use it:
 ```javascript
-var itDepends = require('it-depends').itDepends;
+var itDepends = require('it-depends');
 
 // your code goes here:
 var firstName = itDepends.value('James');

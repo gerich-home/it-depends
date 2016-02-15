@@ -1,5 +1,4 @@
-﻿'use strict';
-/*!
+﻿/*!
 * it-depends - v{{ version }}
 * https://github.com/gerich-home/it-depends
 * Copyright (c) 2016 Sergey Gerasimov; Licensed MSPL
@@ -9,17 +8,17 @@
 (function(rootObject, factory) {
     if (typeof require === 'function' && typeof exports === 'object' && typeof module === 'object') {
         // CommonJS or Node
-        factory(exports);
+		module.exports = factory();
     } else if (typeof define === 'function' && define['amd']) {
         // AMD anonymous module
         define([], factory);
     } else {
         // <script> tag: define the global `itDepends` object
-        var exports = {};
-        factory(exports);
-        rootObject.itDepends = exports;
+        rootObject.itDepends = factory();
     }
-}(this, function(exports) {
+}(this, function() {
+	'use strict';
+	
     var nop = function() {};
     var trackers = [nop];
     var nextId = 0;
@@ -29,92 +28,94 @@
         trackers[trackers.length - 1](id, observableValue, currentValue);
     };
 
-    exports.value = function(initialValue) {
-        var currentValue = initialValue;
-        var id = ++nextId;
+    var library = {
+		value: function(initialValue) {
+			var currentValue = initialValue;
+			var id = ++nextId;
 
-        var self = function() {
-            notifyCurrentTracker(id, self, currentValue);
-            return currentValue;
-        };
+			var self = function() {
+				notifyCurrentTracker(id, self, currentValue);
+				return currentValue;
+			};
 
-        self.write = function(newValue) {
-            if (currentValue !== newValue) {
-                currentValue = newValue;
-                lastWriteVersion++;
-            }
-        };
+			self.write = function(newValue) {
+				if (currentValue !== newValue) {
+					currentValue = newValue;
+					lastWriteVersion++;
+				}
+			};
 
-        return self;
-    };
+			return self;
+		},
+		computed: function(calculator) {
+			var currentValue;
+			var dependencies;
+			var id = ++nextId;
+			var lastReadVersion = -1;
 
-    exports.computed = function(calculator) {
-        var currentValue;
-        var dependencies;
-        var id = ++nextId;
-        var lastReadVersion = -1;
+			var atLeastOneDependencyChanged = function() {
+				for (var dependencyId in dependencies) {
+					if (!dependencies.hasOwnProperty(dependencyId))
+						continue;
 
-        var atLeastOneDependencyChanged = function() {
-            for (var dependencyId in dependencies) {
-                if (!dependencies.hasOwnProperty(dependencyId))
-                    continue;
+					var dependency = dependencies[dependencyId];
 
-                var dependency = dependencies[dependencyId];
+					if (dependency.observableValue() !== dependency.capturedValue) {
+						return true;
+					}
+				}
 
-                if (dependency.observableValue() !== dependency.capturedValue) {
-                    return true;
-                }
-            }
+				return false;
+			};
 
-            return false;
-        };
+			var needRecalcCache;
+			var needRecalc = function() {
+				if (lastReadVersion !== lastWriteVersion) {
+					needRecalcCache = !dependencies || atLeastOneDependencyChanged();
+					lastReadVersion = lastWriteVersion;
+				}
 
-        var needRecalcCache;
-        var needRecalc = function() {
-            if (lastReadVersion !== lastWriteVersion) {
-                needRecalcCache = !dependencies || atLeastOneDependencyChanged();
-                lastReadVersion = lastWriteVersion;
-            }
+				return needRecalcCache;
+			};
 
-            return needRecalcCache;
-        };
+			var self = function() {
+				if (needRecalc()) {
+					dependencies = {};
 
-        var self = function() {
-            if (needRecalc()) {
-                dependencies = {};
+					trackers.push(function(dependencyId, observableValue, capturedValue) {
+						if (dependencies[dependencyId])
+							return;
 
-                trackers.push(function(dependencyId, observableValue, capturedValue) {
-                    if (dependencies[dependencyId])
-                        return;
+						dependencies[dependencyId] = {
+							observableValue: observableValue,
+							capturedValue: capturedValue
+						};
+					});
 
-                    dependencies[dependencyId] = {
-                        observableValue: observableValue,
-                        capturedValue: capturedValue
-                    };
-                });
+					try {
+						currentValue = calculator();
+					} finally {
+						trackers.pop();
+					}
 
-                try {
-                    currentValue = calculator();
-                } finally {
-                    trackers.pop();
-                }
+					needRecalcCache = false;
+				}
 
-                needRecalcCache = false;
-            }
+				notifyCurrentTracker(id, self, currentValue);
 
-            notifyCurrentTracker(id, self, currentValue);
+				return currentValue;
+			};
 
-            return currentValue;
-        };
+			return self;
+		},
+		promiseValue: function(promise, initialValue) {
+			var currentValue = library.value(initialValue);
 
-        return self;
-    };
+			promise.then(currentValue.write);
 
-    exports.promiseValue = function(promise, initialValue) {
-        var currentValue = exports.value(initialValue);
-
-        promise.then(currentValue.write);
-
-        return exports.computed(currentValue);
-    };
+			return library.computed(currentValue);
+		}
+	};
+	
+	return library;
 }));
