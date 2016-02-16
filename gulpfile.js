@@ -43,7 +43,7 @@ gulp.task('test', [], function() {
         }));
 });
 
-gulp.task('coverage', [], function() {
+gulp.task('test-coverage', [], function() {
     return gulp.src('specs/index.js')
 		.pipe(cover.instrument({
 			pattern: ['src/**/*.js']
@@ -53,7 +53,7 @@ gulp.task('coverage', [], function() {
         }))
 		.pipe(cover.gather())
 		.pipe(cover.format())
-		.pipe(gulp.dest('reports'));
+		.pipe(gulp.dest('out/reports'));
 });
 
 function integrationTestTask(name, extension, runner) {
@@ -77,5 +77,5 @@ gulp.task('integration-tests', [
 ]);
 
 gulp.task('tests', ['test', 'integration-tests']);
-gulp.task('continous-integration', ['build', 'tests']);
+gulp.task('continous-integration', ['build', 'test-coverage', 'integration-tests']);
 gulp.task('default', ['build']);

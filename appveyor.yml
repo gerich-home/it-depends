@@ -22,7 +22,9 @@ build: off
 
 artifacts:
   - path: 'out\build\*.js'
-    name: it-depends
+    name: it-depends-library
+  - path: 'out\reports\coverage.html'
+    name: coverage-html
 
 on_success:
   - ps: >-
@@ -34,7 +36,7 @@ deploy:
   provider: GitHub
   auth_token:
     secure: iIQYZTIjnJwRMu4NGFO9iDWVxiULK/6RfSWY6R9Z8W7daJPdGQGMBqblEcpYa9xZ
-  artifact: it-depends
+  artifact: it-depends-library
   on:
     branch: master
     appveyor_repo_tag: true
