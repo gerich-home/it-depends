@@ -1,6 +1,7 @@
 ﻿var gulp = require('gulp');
 var plugins = require('gulp-load-plugins')();
 var mocha = require('gulp-mocha');
+var cover = require('gulp-coverage');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
 var gutil = require('gulp-util');
 
@@ -63,11 +64,16 @@ gulp.task('integration-tests', [
 ]);
 
 gulp.task('coverage', [], function() {
-    return gulp.src('specs')
+    return gulp.src('specs/index.js')
+		.pipe(cover.instrument({
+			pattern: ['src/**/*.js']
+		}))
         .pipe(mocha({
-            reporter: 'html-cov',
-            require: ['blanket']
-        }));
+            reporter: mochaRepoter()
+        }))
+		.pipe(cover.gather())
+		.pipe(cover.format())
+		.pipe(gulp.dest('reports'));
 });
 
 gulp.task('tests', ['test', 'integration-tests']);
