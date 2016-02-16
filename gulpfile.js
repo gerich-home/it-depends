@@ -43,6 +43,19 @@ gulp.task('test', [], function() {
         }));
 });
 
+gulp.task('coverage', [], function() {
+    return gulp.src('specs/index.js')
+		.pipe(cover.instrument({
+			pattern: ['src/**/*.js']
+		}))
+        .pipe(mocha({
+            reporter: mochaRepoter()
+        }))
+		.pipe(cover.gather())
+		.pipe(cover.format())
+		.pipe(gulp.dest('reports'));
+});
+
 function integrationTestTask(name, extension, runner) {
 	gulp.task('integration-test-' + name, ['build'], function() {
 		return gulp
@@ -62,19 +75,6 @@ gulp.task('integration-tests', [
 	'integration-test-requirejs',
 	'integration-test-browser-global'
 ]);
-
-gulp.task('coverage', [], function() {
-    return gulp.src('specs/index.js')
-		.pipe(cover.instrument({
-			pattern: ['src/**/*.js']
-		}))
-        .pipe(mocha({
-            reporter: mochaRepoter()
-        }))
-		.pipe(cover.gather())
-		.pipe(cover.format())
-		.pipe(gulp.dest('reports'));
-});
 
 gulp.task('tests', ['test', 'integration-tests']);
 gulp.task('continous-integration', ['build', 'tests']);
