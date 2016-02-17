@@ -4,6 +4,7 @@ var mocha = require('gulp-mocha');
 var cover = require('gulp-coverage');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
 var gutil = require('gulp-util');
+var coveralls = require('gulp-coveralls');
 
 function updateVersionTask(name, importance) {
     gulp.task(name, function() {
@@ -13,7 +14,7 @@ function updateVersionTask(name, importance) {
     });
 };
 
-function mochaRepoter() {
+function mochaReporter() {
     return gutil.env.appveyor === 'true'
         ? 'mocha-appveyor-reporter'
         : 'spec';
@@ -36,24 +37,22 @@ gulp.task('build', function() {
         .pipe(gulp.dest(outputDir));
 });
 
-gulp.task('test', [], function() {
-    return gulp.src('specs/index.js')
-        .pipe(mocha({
-            reporter: mochaRepoter()
-        }));
-});
-
-gulp.task('test-coverage', [], function() {
+gulp.task('unit-tests', [], function() {
     return gulp.src('specs/index.js')
 		.pipe(cover.instrument({
 			pattern: ['src/**/*.js']
 		}))
         .pipe(mocha({
-            reporter: mochaRepoter()
+            reporter: mochaReporter()
         }))
 		.pipe(cover.gather())
-		.pipe(cover.format())
+		.pipe(cover.format(['html', 'lcov']))
 		.pipe(gulp.dest('out/reports'));
+});
+
+gulp.task('coveralls', ['unit-tests'], function() {
+    return gulp.src('out/reports/coverage.lcov')
+        .pipe(coveralls());
 });
 
 function integrationTestTask(name, extension, runner) {
@@ -61,7 +60,7 @@ function integrationTestTask(name, extension, runner) {
 		return gulp
 			.src('integration-tests/' + name + '/index.' + extension)
 			.pipe(runner({
-				reporter: mochaRepoter()
+				reporter: mochaReporter()
 			}));
 	});
 };
@@ -76,6 +75,7 @@ gulp.task('integration-tests', [
 	'integration-test-browser-global'
 ]);
 
-gulp.task('tests', ['test', 'integration-tests']);
-gulp.task('continous-integration', ['build', 'test-coverage', 'integration-tests']);
-gulp.task('default', ['build']);
+gulp.task('all-tests', ['unit-tests', 'integration-tests']);
+gulp.task('full', ['build', 'all-tests']);
+gulp.task('continous-integration', ['full', 'coveralls']);
+gulp.task('default', ['full']);

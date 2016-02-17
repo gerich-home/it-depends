@@ -1,16 +1,10 @@
 environment:
-  npmrc_token:
-    secure: 827ODotTjWRaqvdFThFhYxnq+4W6qz7RtrtxGYuPPN0=
-
-  matrix:
-    - nodejs_version: "0.10"
-    - nodejs_version: "0.12"
-
+  encrypt_token:
+    secure: 2Tozd/hUxQZSOt/m/E5Spg==
+  nodejs_version: "0.12"
+ 
 install:
-  - ps: >-
-      if($env:APPVEYOR_REPO_TAG_NAME -and $env:nodejs_version -eq '0.12') {
-        ./build/publish/decrypt-npmrc.ps1
-      }
+  - ps: ./build/tools/decrypt-files.ps1
   - ps: Install-Product node $env:nodejs_version
   - npm install
   - npm install -g gulp
@@ -28,8 +22,8 @@ artifacts:
 
 on_success:
   - ps: >-
-      if($env:APPVEYOR_REPO_TAG_NAME -and $env:nodejs_version -eq '0.12') {
-         ./build/publish/publish-npm.ps1
+      if($env:APPVEYOR_REPO_TAG_NAME) {
+         ./build/tools/publish-npm.ps1
       }
 deploy:
   tag: '$(APPVEYOR_REPO_TAG_NAME)'
@@ -40,7 +34,6 @@ deploy:
   on:
     branch: master
     appveyor_repo_tag: true
-    nodejs_version: "0.12"
 
 cache:
   - C:\Users\appveyor\AppData\Roaming\npm\node_modules -> package.json  # global npm modules
