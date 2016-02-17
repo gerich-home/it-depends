@@ -1,4 +1,5 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/dufdv2sefowej3mq?svg=true)](https://ci.appveyor.com/project/gerich-home/it-depends)
+[![Coverage Status](https://coveralls.io/repos/github/gerich-home/it-depends/badge.svg?branch=master)](https://coveralls.io/github/gerich-home/it-depends?branch=master)
 [![npm version](https://badge.fury.io/js/it-depends.svg)](https://badge.fury.io/js/it-depends)
 [![Dependency Status](https://david-dm.org/gerich-home/it-depends.svg)](https://david-dm.org/gerich-home/it-depends)
 [![devDependency Status](https://david-dm.org/gerich-home/it-depends/dev-status.svg)](https://david-dm.org/gerich-home/it-depends#info=devDependencies)
