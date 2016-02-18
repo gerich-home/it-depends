@@ -5,6 +5,9 @@ var cover = require('gulp-coverage');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
 var gutil = require('gulp-util');
 var coveralls = require('gulp-coveralls');
+var browserify = require('browserify');
+var source = require('vinyl-source-stream');
+var buffer = require('vinyl-buffer');
 
 function updateVersionTask(name, importance) {
     gulp.task(name, function() {
@@ -28,8 +31,14 @@ gulp.task('build', function() {
     var pkg = require('./package.json');
     var outputDir = './out/build';
     var libraryName = 'it-depends';
-
-    return gulp.src('./src/' + libraryName + '.js')
+	var b = browserify({
+		entries: './src/' + libraryName + '.js',
+		standalone: 'itDepends'
+	});
+	
+    return b.bundle()
+		.pipe(source(libraryName + '.js'))
+		.pipe(buffer())
         .pipe(plugins.replace('{{ version }}', pkg.version))
         .pipe(gulp.dest(outputDir))
         .pipe(plugins.uglify())

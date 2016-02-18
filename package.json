@@ -8,6 +8,7 @@
   "main": "src/it-depends.js",
   "dependencies": {},
   "devDependencies": {
+    "browserify": "^13.0.0",
     "chai": "^3.5.0",
     "coveralls": "~2.11.6",
     "gulp": "~3.9.0",
@@ -23,7 +24,9 @@
     "gulp-util": "~3.0.7",
     "mocha": "^2.4.5",
     "mocha-appveyor-reporter": "~0.1.0",
-    "requirejs": "^2.1.22"
+    "requirejs": "^2.1.22",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
   },
   "scripts": {},
   "repository": {
