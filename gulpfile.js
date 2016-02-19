@@ -18,7 +18,9 @@ function updateVersionTask(name, importance) {
 };
 
 function mochaReporter() {
-    return "spec";
+    return gutil.env.appveyor === 'true'
+        ? 'mocha-appveyor-reporter'
+        : 'spec';
 };
 
 updateVersionTask('patch', 'patch');
@@ -66,9 +68,7 @@ function integrationTestTask(name, extension, runner) {
 	gulp.task('integration-test-' + name, ['build'], function() {
 		return gulp
 			.src('integration-tests/' + name + '/index.' + extension)
-			.pipe(runner({
-				reporter: mochaReporter()
-			}));
+			.pipe(runner());
 	});
 };
 
