@@ -2,7 +2,10 @@ environment:
   encrypt_token:
     secure: 2Tozd/hUxQZSOt/m/E5Spg==
   nodejs_version: "0.12"
- 
+
+init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
 install:
   - ps: ./build/tools/decrypt-files.ps1
   - ps: Install-Product node $env:nodejs_version
