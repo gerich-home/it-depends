@@ -196,9 +196,9 @@ Workflow:
 1. Create a fork
 2. Clone your git repository
 3. Run `npm install`
-5. Run `gulp test`, they should be green
+5. Run `gulp`, all tests should be green, build should work
 4. Make a code change
-5. Run `gulp test`, they should be green again, fix if failed
+5. Run `gulp`, all tests should be green, build should work, fix if failed
 6. Commit, push
 7. Create PR (pull request)
 
