@@ -18,9 +18,7 @@ function updateVersionTask(name, importance) {
 };
 
 function mochaReporter() {
-    return gutil.env.appveyor === 'true'
-        ? 'mocha-appveyor-reporter'
-        : 'spec';
+    return "spec";
 };
 
 updateVersionTask('patch', 'patch');
