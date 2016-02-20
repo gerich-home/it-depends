@@ -2,6 +2,7 @@ environment:
   encrypt_token:
     secure: 2Tozd/hUxQZSOt/m/E5Spg==
   nodejs_version: "0.12"
+  COVERALLS_GIT_BRANCH: '$(APPVEYOR_REPO_BRANCH)'
 
 install:
   - ps: ./build/tools/decrypt-files.ps1
