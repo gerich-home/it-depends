@@ -3,6 +3,7 @@
 [![npm version](https://badge.fury.io/js/it-depends.svg)](https://badge.fury.io/js/it-depends)
 [![Dependency Status](https://david-dm.org/gerich-home/it-depends.svg)](https://david-dm.org/gerich-home/it-depends)
 [![devDependency Status](https://david-dm.org/gerich-home/it-depends/dev-status.svg)](https://david-dm.org/gerich-home/it-depends#info=devDependencies)
+[![Code Climate](https://codeclimate.com/github/gerich-home/it-depends/badges/gpa.svg)](https://codeclimate.com/github/gerich-home/it-depends)
 
 # it-depends
 Lightweight dependency tracking / caching library for JavaScript
