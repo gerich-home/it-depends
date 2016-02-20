@@ -127,13 +127,13 @@ Updates the current value of observable value object
 Creates computed value object
 
 #### Parameters:
-* `calculator` *(mandatory, function (void) -> any )* - the function that will be called later to (re)calculate the value of computed. Gets called when you request the value for the first time, or when you request the value when some of dependencies (values/computeds) was changed. Should return(calculate) the current value of the computed value object. **Must not** have side-effects.
+* `calculator` *(mandatory, function (parameters:any[]) -> any )* - the function that will be called later to (re)calculate the value of computed. Gets called when you request the value for the first time, or when you request the value when some of dependencies (values/computeds) was changed. Should return(calculate) the current value of the computed value object. **Must not** have side-effects. Calculator function can take parameters. In this case the resulting computed behaves as a set of elementary computeds bound to each distinct set of arguments.
 
 #### Returns:
 the `computed` value object
 
-### `computedValue()`
-Reads the current value of computed value object. `calculator` will be called if it is the first call or if a change was made to some of the dependencies (values/computeds) called from calculator previous time. Otherwise the cached current value will be returned.
+### `computedValue(parameters:any[])`
+Reads the current value of computed value object for the given set of parameters. `calculator` will be called if it is the first call or if a change was made to some of the dependencies (values/computeds) called from calculator previous time. Otherwise the cached current value will be returned.
 During the call dependencies (values/computeds) used in the calculator will be recorded and stored in the list of dependencies.
 
 #### Returns:
