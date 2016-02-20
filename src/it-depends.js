@@ -93,18 +93,27 @@ var library = {
 
 		return self;
 	},
-	computed: function(calculator){
+	computed: function(calculator) {
 		var cache = {};
 		var allArguments = [];
 		
 		return function() {
-			var args = Array.prototype.slice.call(arguments);
 			var key = '';
-			for(var i = 0; i < args.length; i++) {
-				var index = allArguments.indexOf(args[i]);
+			var skippingUndefinedValues = true;
+			
+			for(var i = arguments.length - 1; i >= 0; i--) {
+				var arg = arguments[i];
+				if(skippingUndefinedValues && arg === undefined) {
+					continue;
+				}
+				
+				skippingUndefinedValues = false;
+				
+				var index = allArguments.indexOf(arg);
+			
 				if(index === -1) {
 					key += allArguments.length + ",";
-					allArguments.push(args[i]);
+					allArguments.push(arg);
 				} else {
 					key += index + ",";
 				}
@@ -112,7 +121,7 @@ var library = {
 			
 			var value = cache[key] || (cache[key] = computed(calculator));
 			
-			return value(args);
+			return value(arguments);
 		};
 	},
 	promiseValue: function(promise, initialValue) {

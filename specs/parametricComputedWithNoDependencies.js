@@ -9,7 +9,7 @@ describe('parametric computed with no dependencies', function () {
 	var stringify = function(values) {
 		return JSON.stringify(values, function(key, value) {
 		  if (typeof value === 'undefined') {
-			return "UNDEFINED";
+			return 'undefined';
 		  }
 		  
 		  return value;
@@ -21,22 +21,24 @@ describe('parametric computed with no dependencies', function () {
 	
 	var exampleValues = [
 		[],
+		[null],
+		[true],
+		[false],
 		['a'],
 		['b'],
 		['a', 'b'],
 		[''],
 		[1],
-		[1, undefined],
 		[1, 'test'],
+		[1, 1],
+		[1, 2],
+		[1, undefined, 1],
+		[1, 1, 1],
 		[3],
 		[0],
 		[objB],
 		[objA],
-		[objA, objB],
-		[true],
-		[false],
-		[undefined],
-		[null]
+		[objA, objB]
 	];
 	
 	var valuesIndex = _(exampleValues)
@@ -123,6 +125,14 @@ describe('parametric computed with no dependencies', function () {
 				
 				expect(actualValue).to.equal(makeKey(otherValues));
 				expectCounts([values, 1], [otherValues, 1]);
+			});
+
+			it('should not calculate when passing trailing undefined values', function () {
+				var extendedValues = _(values).concat([undefined, undefined]).value();
+				var actualValue = computedValue.apply(null, extendedValues);
+				
+				expect(actualValue).to.equal(makeKey(values));
+				expectCounts([values, 1]);
 			});
 			
 			context('after was calculated once with values ' + otherValuesString, function () {
