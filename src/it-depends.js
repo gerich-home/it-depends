@@ -17,6 +17,63 @@ function notifyCurrentTracker(id, observableValue, currentValue) {
 	trackers[trackers.length - 1](id, observableValue, currentValue);
 };
 
+var computed = function(calculator) {
+	var currentValue;
+	var dependencies;
+	var id = ++nextId;
+	var lastReadVersion = -1;
+
+	var atLeastOneDependencyChanged = function() {
+		for (var dependencyId in dependencies) {
+			if (!dependencies.hasOwnProperty(dependencyId))
+				continue;
+
+			var dependency = dependencies[dependencyId];
+
+			if (dependency.observableValue() !== dependency.capturedValue) {
+				return true;
+			}
+		}
+
+		return false;
+	};
+
+	var self = function(args) {
+		var needRecalc = function() {
+			return lastReadVersion !== lastWriteVersion &&
+				(!dependencies || atLeastOneDependencyChanged())
+		};
+		
+		if (needRecalc()) {
+			dependencies = {};
+
+			trackers.push(function(dependencyId, observableValue, capturedValue) {
+				if (dependencies[dependencyId])
+					return;
+
+				dependencies[dependencyId] = {
+					observableValue: observableValue,
+					capturedValue: capturedValue
+				};
+			});
+
+			try {
+				currentValue = calculator.apply(null, args);
+			} finally {
+				trackers.pop();
+			}
+			
+			lastReadVersion = lastWriteVersion;
+		}
+
+		notifyCurrentTracker(id, self, currentValue);
+
+		return currentValue;
+	};
+
+	return self;
+};
+
 var library = {
 	value: function(initialValue) {
 		var currentValue = initialValue;
@@ -36,61 +93,27 @@ var library = {
 
 		return self;
 	},
-	computed: function(calculator) {
-		var currentValue;
-		var dependencies;
-		var id = ++nextId;
-		var lastReadVersion = -1;
-
-		var atLeastOneDependencyChanged = function() {
-			for (var dependencyId in dependencies) {
-				if (!dependencies.hasOwnProperty(dependencyId))
-					continue;
-
-				var dependency = dependencies[dependencyId];
-
-				if (dependency.observableValue() !== dependency.capturedValue) {
-					return true;
+	computed: function(calculator){
+		var cache = {};
+		var allArguments = [];
+		
+		return function() {
+			var args = Array.prototype.slice.call(arguments);
+			var key = '';
+			for(var i = 0; i < args.length; i++) {
+				var index = allArguments.indexOf(args[i]);
+				if(index === -1) {
+					key += allArguments.length + ",";
+					allArguments.push(args[i]);
+				} else {
+					key += index + ",";
 				}
 			}
-
-			return false;
+			
+			var value = cache[key] || (cache[key] = computed(calculator));
+			
+			return value(args);
 		};
-
-		var needRecalc = function() {
-			return lastReadVersion !== lastWriteVersion &&
-				(!dependencies || atLeastOneDependencyChanged())
-		};
-
-		var self = function() {
-			if (needRecalc()) {
-				dependencies = {};
-
-				trackers.push(function(dependencyId, observableValue, capturedValue) {
-					if (dependencies[dependencyId])
-						return;
-
-					dependencies[dependencyId] = {
-						observableValue: observableValue,
-						capturedValue: capturedValue
-					};
-				});
-
-				try {
-					currentValue = calculator();
-				} finally {
-					trackers.pop();
-				}
-				
-				lastReadVersion = lastWriteVersion;
-			}
-
-			notifyCurrentTracker(id, self, currentValue);
-
-			return currentValue;
-		};
-
-		return self;
 	},
 	promiseValue: function(promise, initialValue) {
 		var currentValue = library.value(initialValue);
