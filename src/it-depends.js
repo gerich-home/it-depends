@@ -10,7 +10,9 @@
 
 var nop = function() {};
 var trackers = [nop];
+var handlers = {};
 var nextId = 0;
+var nextHandlerId = 0;
 var lastWriteVersion = 0;
 
 function notifyCurrentTracker(id, observableValue, currentValue) {
@@ -75,6 +77,22 @@ var computed = function(calculator) {
 };
 
 var library = {
+	onChange: function(handler) {
+		var handlerId = ++nextHandlerId;
+		
+		var subscription = {
+			enable: function() {
+				handlers[handlerId] = handler;
+			},
+			disable: function() {
+				delete handlers[handlerId];
+			}
+		};
+		
+		subscription.enable();
+		
+		return subscription;
+	},
 	value: function(initialValue) {
 		var currentValue = initialValue;
 		var id = ++nextId;
@@ -86,8 +104,16 @@ var library = {
 
 		self.write = function(newValue) {
 			if (currentValue !== newValue) {
+				var oldValue = currentValue;
 				currentValue = newValue;
 				lastWriteVersion++;
+				
+				for (var handlerId in handlers) {
+					if (!handlers.hasOwnProperty(handlerId))
+						continue;
+					
+					handlers[handlerId](self, oldValue, newValue);
+				}
 			}
 		};
 

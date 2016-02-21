@@ -1,6 +1,6 @@
 {
   "name": "it-depends",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "Lightweight dependency tracking library for JavaScript",
   "files": [
     "src"
