@@ -101,52 +101,55 @@ var firstName = itDepends.value('James');
 
 ### `itDepends.value(initialValue)`
 
-Creates observable value object
+Creates observable value object.
 
 #### Parameters:
-* `initialValue` *(optional, any value, undefined by default)* - the value to be stored in the observable when created
+* `initialValue` *(optional, any value, undefined by default)* - the value to be stored in the observable when created.
 
 #### Returns:
-the `observable` value object
+the `observable` value object.
 
 ### `observableValue()`
-Reads the current value of observable value object
+Reads the current value of observable value object.
 
 #### Returns:
-the current value of observable value object
+the current value of observable value object.
 
 ### `observableValue.write(newValue)`
-Updates the current value of observable value object
+Updates the current value of observable value object.
 
 #### Parameters:
-* `newValue` *(mandatory, any value)* - the new value to write to observable value object
+* `newValue` *(mandatory, any value)* - the new value to write to observable value object.
 
 #### Returns:
 *void*
 
 ### `itDepends.computed(calculator)`
-Creates computed value object
+Creates computed value object.
 
 #### Parameters:
-* `calculator` *(mandatory, function (parameters:any[]) -> any )* - the function that will be called later to (re)calculate the value of computed. Gets called when you request the value for the first time, or when you request the value when some of dependencies (values/computeds) was changed. Should return(calculate) the current value of the computed value object. **Must not** have side-effects. Calculator function can take parameters. In this case the resulting computed behaves as a set of elementary computeds bound to each distinct set of arguments.
+* `calculator` *(mandatory, function (...parameters: any[]) -> any)* - the function that will be called later to (re)calculate the value of computed. Gets called when you request the value for the first time, or when you request the value when some of dependencies (values/computeds) was changed. Should return(calculate) the current value of the computed value object. **Must not** have side-effects. Calculator function can take parameters. In this case the resulting computed behaves as a set of elementary computeds bound to each distinct set of arguments.
 
 #### Returns:
-the `computed` value object
+the `computed` value object.
 
-### `computedValue(parameters:any[])`
+### `computedValue(...parameters)`
 Reads the current value of computed value object for the given set of parameters. `calculator` will be called if it is the first call or if a change was made to some of the dependencies (values/computeds) called from calculator previous time. Otherwise the cached current value will be returned.
 During the call dependencies (values/computeds) used in the calculator will be recorded and stored in the list of dependencies.
 
+#### Parameters:
+* `parameters` *(varadic, any[])* - parameters that will be passed to the `calculator`. Calculator will be called only once for each unique set of parameters unless dependencies are changed. 
+
 #### Returns:
-the current value of computed value object
+the current value of computed value object for the given parameters.
 
 ### `itDepends.promiseValue(promise, initialValue)`
 
-Creates promise value wrapper object
+Creates promise value wrapper object.
 
 #### Parameters:
-* `promise` *(mandatory, [Promise](https://promisesaplus.com/#point-21))* - the promise object that is the source of the value
-* `initialValue` *(optional, any value, undefined by default)* - the value to be stored in the promise value when created
+* `promise` *(mandatory, [Promise](https://promisesaplus.com/#point-21))* - the promise object that is the source of the value.
+* `initialValue` *(optional, any, undefined by default)* - the value to be stored in the promise value when created.
 
 #### Returns:
 the `promise` value object filled with the `initialValue` or `undefined` if none specified.
@@ -156,7 +159,28 @@ Depending on the concrete Promise implementation can be filled with the value of
 Reads the current value of promise value wrapper object.
 
 #### Returns:
-the current value of promise value wrapper object: `initialValue` of an object or the value that was used to resolve the Promise
+the current value of promise value wrapper object: `initialValue` of an object or the value that was used to resolve the Promise.
+
+### `itDepends.onChange(callback)`
+Creates the subscription on a change to any observable value.
+
+#### Parameters:
+* `callback` *(mandatory, function (changed: observableValue, from: any, to: any) -> void )* - the function that will be called immediately when a change is made to any observable value. The callback receives the changed observableValue, old value of observable value and new value.
+
+#### Returns:
+the `subscription` object that can be used to control the subscription.
+
+### `subscription.disable()`
+Disables subscription, so change notifications will stop coming any more, unless it is enabled again with `enable` method.
+
+#### Returns:
+*void*
+
+### `subscription.enable()`
+Enables subscription if it was disabled previously, so change notifications will start coming again.
+
+#### Returns:
+*void*
 
 ## Example code ([Try it in Tonic](https://tonicdev.com/gerichhome/it-depends))
 ```javascript
