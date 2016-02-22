@@ -131,7 +131,7 @@ var library = {
 		var cache = {};
 		var allArguments = [];
 		
-		return function() {
+		var self = function() {
 			var key = '';
 			var skippingUndefinedValues = true;
 			
@@ -157,6 +157,21 @@ var library = {
 			
 			return value(arguments);
 		};
+		
+		self.onChange = function(handler) {
+			var oldValue = self();
+			
+			return library.onChange(function() {
+				var newValue = self();
+				
+				if(newValue !== oldValue) {
+					oldValue = newValue;
+					handler(self, oldValue, newValue);
+				}
+			});
+		};
+		
+		return self;
 	},
 	promiseValue: function(promise, initialValue) {
 		var currentValue = library.value(initialValue);
