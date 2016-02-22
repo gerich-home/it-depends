@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 var itDepends = require('../src/it-depends.js');
 
-describe('general change callback', function () {
+describe('value change callback', function () {
 	var callCount;
 	var observableValue;
 	var subscription;
@@ -13,13 +13,12 @@ describe('general change callback', function () {
 		expect(lastChange.to).to.equal(expected.to);
 	};
 
-
 	beforeEach(function() {
 		callCount = 0;
 
 		observableValue = itDepends.value('Bob');
 
-		subscription = itDepends.onChange(function(changed, from, to) {
+		subscription = observableValue.onChange(function(changed, from, to) {
 			callCount++;
 			lastChange = { changed: changed, from: from, to: to };
 		});
@@ -55,47 +54,11 @@ describe('general change callback', function () {
 		});
 	});
 	
-	context('when other observable value is created', function() {
-		var otherValue;
+	it('should not be triggered when other observable is changed', function () {
+		var otherValue = itDepends.value('Jack');
+		otherValue.write('James');
 		
-		beforeEach(function() {
-			otherValue = itDepends.value('Jack');
-		});
-		
-		it('should not be triggered when other observable is created', function () {
-			expect(callCount).to.equal(0);
-		});
-	
-		it('should be triggered once when observable is changed', function () {
-			observableValue.write('Jack');
-			
-			expect(callCount).to.equal(1);
-			expectLastChanges({ changed: observableValue, from: 'Bob', to: 'Jack' });
-		});
-	
-		it('should be triggered once when other observable is changed', function () {
-			otherValue.write('James');
-			
-			expect(callCount).to.equal(1);
-			expectLastChanges({ changed: otherValue, from: 'Jack', to: 'James' });
-		});
-	});
-	
-	context('when there is a computed depending on observable value', function() {
-		var computedValue;
-		
-		beforeEach(function() {
-			computedValue = itDepends.computed(function() {
-				return "Hello, " + observableValue();
-			});
-		});
-	
-		it('should be triggered once when observable is changed', function () {
-			observableValue.write('Jack');
-			
-			expect(callCount).to.equal(1);
-			expectLastChanges({ changed: observableValue, from: 'Bob', to: 'Jack' });
-		});
+		expect(callCount).to.equal(0);
 	});
 	
 	context('when disabled', function() {

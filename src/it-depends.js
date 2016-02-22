@@ -116,7 +116,15 @@ var library = {
 				}
 			}
 		};
-
+		
+		self.onChange = function(handler) {
+			return library.onChange(function(changed, from, to) {
+				if(changed === self) {
+					handler(changed, from, to);
+				}
+			});
+		};
+		
 		return self;
 	},
 	computed: function(calculator) {

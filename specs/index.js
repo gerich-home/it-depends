@@ -7,3 +7,4 @@ require('./computedWith2ValueDependencies.js');
 require('./promiseValue.js');
 require('./parametricComputedWithNoDependencies.js');
 require('./generalChangeCallback.js');
+require('./valueChangeCallback.js');
