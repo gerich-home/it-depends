@@ -4,14 +4,19 @@ environment:
   nodejs_version: "0.12"
   COVERALLS_GIT_BRANCH: '$(APPVEYOR_REPO_BRANCH)'
 
+init:
+  - ps: $env:ITDEPENDS_MASTER_NOT_PR = (($env:APPVEYOR_REPO_BRANCH -eq 'master') -and (-not $env:APPVEYOR_PULL_REQUEST_NUMBER))
 install:
-  - ps: ./build/tools/decrypt-files.ps1
+  - ps: >-
+      if($env:ITDEPENDS_MASTER_NOT_PR) {
+         ./build/tools/decrypt-files.ps1
+      }
   - ps: Install-Product node $env:nodejs_version
   - npm install
   - npm install -g gulp
 
 test_script:
-  - gulp --appveyor=true continous-integration
+  - gulp continous-integration
 
 build: off
 
@@ -23,7 +28,7 @@ artifacts:
 
 on_success:
   - ps: >-
-      if($env:APPVEYOR_REPO_TAG_NAME) {
+      if($env:APPVEYOR_REPO_TAG_NAME -and $env:ITDEPENDS_MASTER_NOT_PR) {
          ./build/tools/publish-npm.ps1
       }
 deploy:

@@ -3,7 +3,6 @@ var plugins = require('gulp-load-plugins')();
 var mocha = require('gulp-mocha');
 var cover = require('gulp-coverage');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
-var gutil = require('gulp-util');
 var coveralls = require('gulp-coveralls');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
@@ -18,9 +17,13 @@ function updateVersionTask(name, importance) {
 };
 
 function mochaReporter() {
-    return gutil.env.appveyor === 'true'
+    return process.env.APPVEYOR === 'True'
         ? 'mocha-appveyor-reporter'
         : 'spec';
+};
+
+function isMasterBranchAndNotPr() {
+    return process.env.ITDEPENDS_MASTER_NOT_PR === 'True';
 };
 
 updateVersionTask('patch', 'patch');
@@ -84,5 +87,11 @@ gulp.task('integration-tests', [
 
 gulp.task('all-tests', ['unit-tests', 'integration-tests']);
 gulp.task('full', ['build', 'all-tests']);
-gulp.task('continous-integration', ['full', 'coveralls']);
+
+if(isMasterBranchAndNotPr()) {
+	gulp.task('continous-integration', ['full', 'coveralls']);
+} else {
+	gulp.task('continous-integration', ['full']);
+}
+
 gulp.task('default', ['full']);
