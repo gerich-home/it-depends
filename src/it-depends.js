@@ -165,9 +165,9 @@ var library = {
 				var newValue = self();
 				
 				if(newValue !== oldValue) {
-					oldValue = newValue;
 					handler(self, oldValue, newValue);
-				}
+					oldValue = newValue;
+                                }
 			});
 		};
 		
