@@ -49,13 +49,13 @@ describe('computed value change callback', function () {
 
 		it('should be triggered once', function () {
 			expect(calls.count).to.equal(1);
-			expectLastChanges({ changed: observableValue, from: 'Hello, Bob', to: 'Hello,Hello, Jack' });
+			expectLastChanges({ changed: computedValue, from: 'Hello, Bob', to: 'Hello,Hello, Jack' });
 		});
 
 		it('should be triggered once when changed back', function () {
 			observableValue.write('Bob');
 			expect(calls.count).to.equal(2);
-			expectLastChanges({ changed: observableValue, from: 'Hello, Jack', to: 'Hello, Bob' });
+			expectLastChanges({ changed: computedValue, from: 'Hello, Jack', to: 'Hello, Bob' });
 		});
 	});
 	
@@ -86,7 +86,7 @@ describe('computed value change callback', function () {
 				observableValue.write('Jack');
 				
 				expect(calls.count).to.equal(1);
-				expectLastChanges({ changed: observableValue, from: 'Hello, Bob', to: 'Hello, Jack' });
+				expectLastChanges({ changed: computedValue, from: 'Hello, Bob', to: 'Hello, Jack' });
 			});
 		});
 	});
