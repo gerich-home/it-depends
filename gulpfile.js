@@ -34,8 +34,8 @@ if(process.env.APPVEYOR) {
 	console.log('ITDEPENDS_MASTER_NOT_PR: ' + process.env.ITDEPENDS_MASTER_NOT_PR);
 	console.log('APPVEYOR_REPO_BRANCH: ' + process.env.APPVEYOR_REPO_BRANCH);
 	console.log('APPVEYOR_PULL_REQUEST_NUMBER: ' + process.env.APPVEYOR_PULL_REQUEST_NUMBER);
-	console.log('isPullRequest(): ' + process.env.isPullRequest());
-	console.log('isMasterBranch(): ' + process.env.isMasterBranch());
+	console.log('isPullRequest(): ' +isPullRequest());
+	console.log('isMasterBranch(): ' + isMasterBranch());
 }
 
 updateVersionTask('patch', 'patch');
