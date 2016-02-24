@@ -3,7 +3,6 @@ var plugins = require('gulp-load-plugins')();
 var mocha = require('gulp-mocha');
 var cover = require('gulp-coverage');
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
-var gutil = require('gulp-util');
 var coveralls = require('gulp-coveralls');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
@@ -18,10 +17,26 @@ function updateVersionTask(name, importance) {
 };
 
 function mochaReporter() {
-    return gutil.env.appveyor === 'true'
+    return process.env.APPVEYOR === 'True'
         ? 'mocha-appveyor-reporter'
         : 'spec';
 };
+
+function isPullRequest() {
+    return process.env.APPVEYOR_PULL_REQUEST_NUMBER !== undefined;
+};
+
+function isMasterBranch() {
+    return process.env.APPVEYOR_REPO_BRANCH === 'master';
+};
+
+if(process.env.APPVEYOR) {
+	console.log('ITDEPENDS_MASTER_NOT_PR: ' + process.env.ITDEPENDS_MASTER_NOT_PR);
+	console.log('APPVEYOR_REPO_BRANCH: ' + process.env.APPVEYOR_REPO_BRANCH);
+	console.log('APPVEYOR_PULL_REQUEST_NUMBER: ' + process.env.APPVEYOR_PULL_REQUEST_NUMBER);
+	console.log('isPullRequest(): ' +isPullRequest());
+	console.log('isMasterBranch(): ' + isMasterBranch());
+}
 
 updateVersionTask('patch', 'patch');
 updateVersionTask('feature', 'minor');
@@ -84,5 +99,11 @@ gulp.task('integration-tests', [
 
 gulp.task('all-tests', ['unit-tests', 'integration-tests']);
 gulp.task('full', ['build', 'all-tests']);
-gulp.task('continous-integration', ['full', 'coveralls']);
+
+if(isPullRequest()) {
+	gulp.task('continous-integration', ['full']);
+} else {
+	gulp.task('continous-integration', ['full', 'coveralls']);
+}
+
 gulp.task('default', ['full']);

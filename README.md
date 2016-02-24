@@ -165,7 +165,16 @@ the current value of promise value wrapper object: `initialValue` of an object o
 Creates the subscription on a change to any observable value.
 
 #### Parameters:
-* `callback` *(mandatory, function (changed: observableValue, from: any, to: any) -> void )* - the function that will be called immediately when a change is made to any observable value. The callback receives the changed observableValue, old value of observable value and new value.
+* `callback` *(mandatory, function (changed: observableValue, from: any, to: any) -> void )* - the function that will be called immediately when a change is made to any observable value. The callback receives the changed observableValue, old and new value of observable object.
+
+#### Returns:
+the `subscription` object that can be used to control the subscription.
+
+### `observableValue.onChange(callback)`
+Creates the subscription on a change to this observable value.
+
+#### Parameters:
+* `callback` *(mandatory, function (changed: observableValue, from: any, to: any) -> void )* - the function that will be called immediately when a change is made to this observable value. The callback receives the changed observableValue, old and new value of observable object.
 
 #### Returns:
 the `subscription` object that can be used to control the subscription.

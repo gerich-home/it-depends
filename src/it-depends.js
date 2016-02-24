@@ -116,14 +116,22 @@ var library = {
 				}
 			}
 		};
-
+		
+		self.onChange = function(handler) {
+			return library.onChange(function(changed, from, to) {
+				if(changed === self) {
+					handler(changed, from, to);
+				}
+			});
+		};
+		
 		return self;
 	},
 	computed: function(calculator) {
 		var cache = {};
 		var allArguments = [];
 		
-		return function() {
+		var self = function() {
 			var key = '';
 			var skippingUndefinedValues = true;
 			
@@ -149,6 +157,21 @@ var library = {
 			
 			return value(arguments);
 		};
+		
+		self.onChange = function(handler) {
+			var oldValue = self();
+			
+			return library.onChange(function() {
+				var newValue = self();
+				
+				if(newValue !== oldValue) {
+					handler(self, oldValue, newValue);
+					oldValue = newValue;
+                }
+			});
+		};
+		
+		return self;
 	},
 	promiseValue: function(promise, initialValue) {
 		var currentValue = library.value(initialValue);
