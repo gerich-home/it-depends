@@ -5,10 +5,18 @@ environment:
   COVERALLS_GIT_BRANCH: '$(APPVEYOR_REPO_BRANCH)'
 
 init:
-  - ps: $env:ITDEPENDS_MASTER_NOT_PR = (($env:APPVEYOR_REPO_BRANCH -eq 'master') -and (-not $env:APPVEYOR_PULL_REQUEST_NUMBER))
+  - ps: $env:ITDEPENDS_IS_PR = ($env:APPVEYOR_PULL_REQUEST_NUMBER)
+  - ps: $env:ITDEPENDS_IS_MASTER = ($env:APPVEYOR_REPO_BRANCH -eq 'master')
+  - ps: $env:ITDEPENDS_MASTER_NOT_PR = ($env:ITDEPENDS_IS_MASTER -and (-not $env:ITDEPENDS_IS_PR))
+
 install:
+  - ps: Write-Host ("APPVEYOR_REPO_BRANCH:", $env:APPVEYOR_REPO_BRANCH)
+  - ps: Write-Host ("APPVEYOR_REPO_TAG_NAME:", $env:APPVEYOR_REPO_TAG_NAME)
+  - ps: Write-Host ("ITDEPENDS_IS_PR:", $env:ITDEPENDS_IS_PR)
+  - ps: Write-Host ("ITDEPENDS_IS_MASTER:", $env:ITDEPENDS_IS_MASTER)
+  - ps: Write-Host ("ITDEPENDS_MASTER_NOT_PR:", $env:ITDEPENDS_MASTER_NOT_PR)
   - ps: >-
-      if($env:ITDEPENDS_MASTER_NOT_PR) {
+      if(-not $env:ITDEPENDS_IS_PR) {
          ./build/tools/decrypt-files.ps1
       }
   - ps: Install-Product node $env:nodejs_version
@@ -31,6 +39,7 @@ on_success:
       if($env:APPVEYOR_REPO_TAG_NAME -and $env:ITDEPENDS_MASTER_NOT_PR) {
          ./build/tools/publish-npm.ps1
       }
+
 deploy:
   tag: '$(APPVEYOR_REPO_TAG_NAME)'
   provider: GitHub
