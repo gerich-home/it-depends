@@ -16,6 +16,11 @@ function updateVersionTask(name, importance) {
     });
 };
 
+console.log(process.env.APPVEYOR);
+console.log(process.env.ITDEPENDS_MASTER_NOT_PR);
+console.log(process.env.APPVEYOR_REPO_BRANCH);
+console.log(process.env.APPVEYOR_PULL_REQUEST_NUMBER);
+
 function mochaReporter() {
     return process.env.APPVEYOR === 'True'
         ? 'mocha-appveyor-reporter'
