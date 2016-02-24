@@ -5,8 +5,8 @@ environment:
   COVERALLS_GIT_BRANCH: '$(APPVEYOR_REPO_BRANCH)'
 
 init:
-  - ps: $env:ITDEPENDS_IS_PR = ($env:APPVEYOR_PULL_REQUEST_NUMBER)
-  - ps: $env:ITDEPENDS_IS_MASTER = (($env:APPVEYOR_REPO_BRANCH) -eq 'master')
+  - ps: $env:ITDEPENDS_IS_PR = ($env:APPVEYOR_PULL_REQUEST_NUMBER -ne '')
+  - ps: $env:ITDEPENDS_IS_MASTER = ($env:APPVEYOR_REPO_BRANCH -eq 'master')
   - ps: $env:ITDEPENDS_MASTER_NOT_PR = (($env:ITDEPENDS_IS_MASTER) -and (-not ($env:ITDEPENDS_IS_PR)))
 
 install:
