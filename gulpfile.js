@@ -23,7 +23,7 @@ function mochaReporter() {
 };
 
 function isPullRequest() {
-    return process.env.APPVEYOR_PULL_REQUEST_NUMBER === undefined;
+    return process.env.APPVEYOR_PULL_REQUEST_NUMBER !== undefined;
 };
 
 function isMasterBranch() {
