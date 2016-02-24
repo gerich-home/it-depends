@@ -8,4 +8,4 @@ require('./promiseValue.js');
 require('./parametricComputedWithNoDependencies.js');
 require('./generalChangeCallback.js');
 require('./valueChangeCallback.js');
-require('./computedValueChangeCallback.js');
+require('./computedChangeCallback.js');

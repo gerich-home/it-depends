@@ -6,17 +6,16 @@ describe('computed value change callback', function () {
 	var observableValue;
 	var computedValue;
 	var subscription;
-	var lastChange;
 	
 	var expectLastChanges = function(expected) {
-		expect(lastChange.changed).to.equal(expected.changed);
-		expect(lastChange.from).to.equal(expected.from);
-		expect(lastChange.to).to.equal(expected.to);
+		expect(calls.lastChange.changed).to.equal(expected.changed);
+		expect(calls.lastChange.from).to.equal(expected.from);
+		expect(calls.lastChange.to).to.equal(expected.to);
 	};
 
 	beforeEach(function() {
-		var counter = { count: 0 };
-		calls = counter;
+		var callsSpy = { count: 0 };
+		calls = callsSpy;
 
 		observableValue = itDepends.value('Bob');
 		computedValue = itDepends.computed(function() {
@@ -24,8 +23,8 @@ describe('computed value change callback', function () {
 		});
 
 		subscription = computedValue.onChange(function(changed, from, to) {
-			counter.calls++;
-			lastChange = { changed: changed, from: from, to: to };
+			callsSpy.count++;
+			callsSpy.lastChange = { changed: changed, from: from, to: to };
 		});
 	});
 	
@@ -49,7 +48,7 @@ describe('computed value change callback', function () {
 
 		it('should be triggered once', function () {
 			expect(calls.count).to.equal(1);
-			expectLastChanges({ changed: computedValue, from: 'Hello, Bob', to: 'Hello,Hello, Jack' });
+			expectLastChanges({ changed: computedValue, from: 'Hello, Bob', to: 'Hello, Jack' });
 		});
 
 		it('should be triggered once when changed back', function () {

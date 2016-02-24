@@ -5,24 +5,23 @@ describe('general change callback', function () {
 	var calls;
 	var observableValue;
 	var subscription;
-	var lastChange;
 	
 	var expectLastChanges = function(expected) {
-		expect(lastChange.changed).to.equal(expected.changed);
-		expect(lastChange.from).to.equal(expected.from);
-		expect(lastChange.to).to.equal(expected.to);
+		expect(calls.lastChange.changed).to.equal(expected.changed);
+		expect(calls.lastChange.from).to.equal(expected.from);
+		expect(calls.lastChange.to).to.equal(expected.to);
 	};
 
 
 	beforeEach(function() {
-		var counter = { count: 0 };
-		calls = counter;
+		var callsSpy = { count: 0 };
+		calls = callsSpy;
 
 		observableValue = itDepends.value('Bob');
 
 		subscription = itDepends.onChange(function(changed, from, to) {
-			counter.count++;
-			lastChange = { changed: changed, from: from, to: to };
+			callsSpy.count++;
+			callsSpy.lastChange = { changed: changed, from: from, to: to };
 		});
 	});
 	
