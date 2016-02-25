@@ -1,11 +1,6 @@
-﻿require('./value.js');
-require('./computedWithNoDependencies.js');
-require('./computedWithValueDependency.js');
-require('./computedWithComputedDependency.js');
-require('./unrelatedComputeds.js');
-require('./computedWith2ValueDependencies.js');
-require('./promiseValue.js');
-require('./parametricComputedWithNoDependencies.js');
-require('./generalChangeCallback.js');
-require('./valueChangeCallback.js');
-require('./computedChangeCallback.js');
+﻿var fs = require('fs');
+var specs = fs.readdirSync('./specs');
+
+specs.forEach(function(spec) {
+	require('./' + spec);
+});
