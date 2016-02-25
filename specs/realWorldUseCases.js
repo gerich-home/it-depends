@@ -63,5 +63,20 @@ describe('usage of the library in the real world scenarios', function () {
 				expect(callCount).to.equal(1);
 			});
 		});
+		
+		context('after was requested', function () {		
+			beforeEach(function() {
+				d();
+			});
+			
+			it('should not recalculate when requested after a change is made to false condition branch variable', function () {
+				c.write(6);
+
+				var actualValue = d();
+				
+				expect(actualValue).to.equal(2);
+				expect(callCount).to.equal(1);
+			});
+		});
 	});
 });
