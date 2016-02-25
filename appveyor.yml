@@ -7,7 +7,7 @@ environment:
 init:
   - ps: $env:ITDEPENDS_IS_PR = (-not (-not ($env:APPVEYOR_PULL_REQUEST_NUMBER)))
   - ps: $env:ITDEPENDS_IS_MASTER = ($env:APPVEYOR_REPO_BRANCH -eq 'master')
-  - ps: $env:ITDEPENDS_MASTER_NOT_PR = (($env:ITDEPENDS_IS_MASTER) -and (-not ($env:ITDEPENDS_IS_PR)))
+  - ps: $env:ITDEPENDS_MASTER_NOT_PR = (($env:ITDEPENDS_IS_MASTER -eq 'True') -and (-not ($env:ITDEPENDS_IS_PR -eq 'True')))
 
 install:
   - ps: Write-Host ("APPVEYOR_REPO_BRANCH:", $env:APPVEYOR_REPO_BRANCH)
@@ -16,7 +16,7 @@ install:
   - ps: Write-Host ("ITDEPENDS_IS_MASTER:", $env:ITDEPENDS_IS_MASTER)
   - ps: Write-Host ("ITDEPENDS_MASTER_NOT_PR:", $env:ITDEPENDS_MASTER_NOT_PR)
   - ps: >-
-      if(-not ($env:ITDEPENDS_IS_PR)) {
+      if($env:ITDEPENDS_IS_PR -eq 'False') {
          ./build/tools/decrypt-files.ps1
       }
   - ps: Install-Product node $env:nodejs_version
@@ -36,7 +36,7 @@ artifacts:
 
 on_success:
   - ps: >-
-      if(($env:APPVEYOR_REPO_TAG_NAME) -and ($env:ITDEPENDS_MASTER_NOT_PR)) {
+      if(($env:APPVEYOR_REPO_TAG_NAME) -and ($env:ITDEPENDS_MASTER_NOT_PR -eq 'True')) {
          ./build/tools/publish-npm.ps1
       }
 
