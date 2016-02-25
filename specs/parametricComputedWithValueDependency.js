@@ -7,7 +7,8 @@ describe('parameteric computed with single value dependency', function () {
 	var observableValues;
 	var computedValue;
 
-	var expectCalls = function(expectedCounts) {
+	var expectCalls = function(expectedCountPairs) {
+		var expectedCounts = _.zipObject(expectedCountPairs);
 		var expectedKeys = _.keys(expectedCounts);
 		var actualKeys = _.keys(callCounts);
 		
@@ -36,31 +37,37 @@ describe('parameteric computed with single value dependency', function () {
 		});
 	});
 
-	var describeCalledWithParameters = function(expectCalls, args) {
-		context('with parameters ' + JSON.stringify(args), function () {
+	var withParametersSpecName = function(value) {
+		if(value) {
+			return 'with parameter ' + value;
+		}
+		
+		return 'with no parameters';
+	};
+	
+	var describeCalledWithParameters = function(expectCalls, parameterValue, parameterName) {
+		var parameters = [parameterValue];
+		
+		context(withParametersSpecName(parameterValue), function () {
 			it('should not calculate when created', function () {
-				expectCalls({});
+				expectCalls([]);
 			});
 			
 			it('should calculate when requested', function () {
-				var actualValue = computedValue.call(args);
+				var actualValue = computedValue.call(parameters);
 				expect(actualValue).to.equal('Hello, Incognito');
-				expectCalls({
-					anonymous: 1
-				});
+				expectCalls([parameterName, 1]);
 			});
 
 			context('after was calculated once', function () {
 				beforeEach(function(){
-					computedValue.call(args);
+					computedValue.call(parameters);
 				});
 
 				it('should not calculate second time if value dependency was not changed', function () {
-					var actualValue = computedValue.call(args);
+					var actualValue = computedValue.call(parameters);
 					expect(actualValue).to.equal('Hello, Incognito');
-					expectCalls({
-						anonymous: 1
-					});
+					expectCalls([parameterName, 1]);
 				});
 				
 				context('after value dependency was changed', function () {
@@ -69,17 +76,13 @@ describe('parameteric computed with single value dependency', function () {
 					});
 
 					it('should not recalculate immediately', function () {
-						expectCalls({
-							anonymous: 1
-						});
+						expectCalls([parameterName, 1]);
 					});
 
 					it('should recalculate when requested', function () {
-						var actualValue = computedValue.call(args);
+						var actualValue = computedValue.call(parameters);
 						expect(actualValue).to.equal('Hello, Jack');
-						expectCalls({
-							anonymous: 2
-						});
+						expectCalls([parameterName, 2]);
 					});
 
 					context('after value dependency was changed back immediatelly', function () {
@@ -88,11 +91,9 @@ describe('parameteric computed with single value dependency', function () {
 						});
 
 						it('should not recalculate when requested', function () {
-							var actualValue = computedValue.call(args);
+							var actualValue = computedValue.call(parameters);
 							expect(actualValue).to.equal('Hello, Incognito');
-							expectCalls({
-								anonymous: 1
-							});
+							expectCalls([parameterName, 1]);
 						});
 					});
 				});
@@ -104,28 +105,24 @@ describe('parameteric computed with single value dependency', function () {
 				});
 
 				it('should not recalculate immediately', function () {
-					expectCalls({});
+					expectCalls([]);
 				});
 
 				it('should recalculate when requested', function () {
-					var actualValue = computedValue.call(args);
+					var actualValue = computedValue.call(parameters);
 					expect(actualValue).to.equal('Hello, Jack');
-					expectCalls({
-						anonymous: 1
-					});
+					expectCalls([parameterName, 1]);
 				});
 				
 				context('after was recalculated', function () {
 					beforeEach(function(){
-						computedValue.call(args);
+						computedValue.call(parameters);
 					});
 
 					it('should not calculate second time if value dependency was not changed', function () {
-						var actualValue = computedValue.call(args);
+						var actualValue = computedValue.call(parameters);
 						expect(actualValue).to.equal('Hello, Jack');
-						expectCalls({
-							anonymous: 1
-						});
+						expectCalls([parameterName, 1]);
 					});
 					
 				});
@@ -133,19 +130,22 @@ describe('parameteric computed with single value dependency', function () {
 			});
 		});
 	};
-	
-	describeCalledWithParameters(expectCalls, []);
 
-	context('after was called with a parameter', function () {
-		beforeEach(function(){
-			computedValue('quickFox');
+	var describeCalledWithParameter = function(otherParameterName, otherParameterValue, parameterValue, parameterName) {
+		context('after was called ' + withParametersSpecName(otherParameterValue), function () {
+			beforeEach(function(){
+				computedValue(otherParameterValue);
+			});
+			
+			describeCalledWithParameters(function(expected) {
+				expectCalls(_.concat([otherParameterName, 1], expected));
+			}, parameterValue, parameterName);
 		});
-		
-		describeCalledWithParameters(function(expected) {
-			expectCalls(_.defaults({
-				quickFox: 1
-			}, expected));
-		}, []);
-	});
-
+	};
+	
+	describeCalledWithParameters(expectCalls, undefined, 'anonymous');
+	describeCalledWithParameters(expectCalls, 'quickFox', 'quickFox');
+	describeCalledWithParameter(undefined, 'anonymous', 'quickFox', 'quickFox');
+	describeCalledWithParameter('quickFox', 'quickFox', undefined, 'anonymous');
+	describeCalledWithParameter('quickFox', 'quickFox', 'lazyDog', 'lazyDog');
 });
