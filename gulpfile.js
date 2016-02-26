@@ -17,9 +17,7 @@ function updateVersionTask(name, importance) {
 };
 
 function mochaReporter() {
-    return process.env.APPVEYOR === 'True'
-        ? 'mocha-appveyor-reporter'
-        : 'spec';
+    return 'spec';
 };
 
 function isPullRequest() {
