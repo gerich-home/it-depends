@@ -19,7 +19,7 @@ function notifyCurrentTracker(id, observableValue, currentValue) {
 	trackers[trackers.length - 1](id, observableValue, currentValue);
 };
 
-var computed = function(calculator) {
+var createComputed = function(calculator, args) {
 	var currentValue;
 	var dependencies;
 	var id = ++nextId;
@@ -40,7 +40,7 @@ var computed = function(calculator) {
 		return false;
 	};
 
-	var self = function(args) {
+	var self = function() {
 		var needRecalc = function() {
 			return lastReadVersion !== lastWriteVersion &&
 				(!dependencies || atLeastOneDependencyChanged())
@@ -136,6 +136,24 @@ var library = {
 			return computedWithArgs();
 		};
 		
+		self.onChange = function(handler) {
+			var computedWithNoArgs = self.withNoArgs();
+			var oldValue = computedWithNoArgs();
+			
+			return library.onChange(function() {
+				var newValue = computedWithNoArgs();
+				
+				if(newValue !== oldValue) {
+					handler(computedWithNoArgs, oldValue, newValue, []);
+					oldValue = newValue;
+				}
+			});
+		};
+		
+		self.withNoArgs = function() {
+			return self.withArgs();
+		};
+		
 		self.withArgs = function() {
 			var key = '';
 			var skippingUndefinedValues = true;
@@ -159,22 +177,7 @@ var library = {
 			}
 			
 			var args = arguments;
-			return cache[key] || (cache[key] = computed(function() {
-				return calculator.apply(null, args);
-			}));
-		};
-		
-		self.onChange = function(handler) {
-			var oldValue = self();
-			
-			return library.onChange(function() {
-				var newValue = self();
-				
-				if(newValue !== oldValue) {
-					handler(self, oldValue, newValue);
-					oldValue = newValue;
-                }
-			});
+			return cache[key] || (cache[key] = createComputed(calculator, args));
 		};
 		
 		return self;
@@ -184,7 +187,7 @@ var library = {
 
 		promise.then(currentValue.write);
 
-		return library.computed(currentValue);
+		return library.computed(currentValue).withArgs();
 	}
 };
 
