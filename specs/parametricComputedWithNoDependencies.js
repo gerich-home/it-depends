@@ -165,4 +165,10 @@ describe('parametric computed with no dependencies', function () {
 	describeUsageSyntax(function(parameters) {
 		return computedValue.apply(null, parameters);
 	});
+	
+	describeUsageSyntax(function(parameters) {
+		var nestedComputed = computedValue.withArgs.apply(null, parameters);
+		
+		return nestedComputed();
+	});
 });

@@ -132,6 +132,11 @@ var library = {
 		var allArguments = [];
 		
 		var self = function() {
+			var computedWithArgs = self.withArgs.apply(null, arguments);
+			return computedWithArgs();
+		};
+		
+		self.withArgs = function() {
 			var key = '';
 			var skippingUndefinedValues = true;
 			
@@ -146,16 +151,17 @@ var library = {
 				var index = allArguments.indexOf(arg);
 			
 				if(index === -1) {
-					key += allArguments.length + ",";
+					key += allArguments.length + ":";
 					allArguments.push(arg);
 				} else {
-					key += index + ",";
+					key += index + ":";
 				}
 			}
 			
-			var value = cache[key] || (cache[key] = computed(calculator));
-			
-			return value(arguments);
+			var args = arguments;
+			return cache[key] || (cache[key] = computed(function() {
+				return calculator.apply(null, args);
+			}));
 		};
 		
 		self.onChange = function(handler) {
