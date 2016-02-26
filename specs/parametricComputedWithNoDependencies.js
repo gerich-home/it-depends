@@ -56,13 +56,12 @@ describe('parametric computed with no dependencies', function () {
 	};
 	
 	var expectCounts = function() {
-		var args = Array.prototype.slice.call(arguments);
-		
 		var expectedCounts = {};
-		for(var i = 0; i < args.length; i++) {
-			var key = makeKey(args[i][0]);
+		for(var i = 0; i < arguments.length; i++) {
+			var arg = arguments[i];
+			var key = makeKey(arg[0]);
 			expect(expectedCounts).to.not.include.keys(key);
-			expectedCounts[key] = args[i][1];
+			expectedCounts[key] = arg[1];
 		}
 		
 		for(var key in expectedCounts) {
@@ -82,82 +81,88 @@ describe('parametric computed with no dependencies', function () {
 		callCounts = {};
 
 		computedValue = itDepends.computed(function() {
-			var result = makeKey(Array.prototype.slice.call(arguments));
-			callCounts[result] = callCounts[result] ? callCounts[result] + 1 : 1;
+			var result = makeKey(arguments);
+			callCounts[result] = (callCounts[result] || 0) + 1;
 			
 			return result;
 		});
 	});
-
+	
 	it('should not calculate when created', function () {
 		expectCounts();
 	});
 
-	var defineTest = function(i) {
-		var values = exampleValues[i];
-		var valuesString = stringify(values);
-		
-		it('should calculate when requested with values ' + valuesString, function () {
-			var actualValue = computedValue.apply(null, values);
+	var describeUsageSyntax = function(invokeComputed) {
+		var defineTest = function(i) {
+			var values = exampleValues[i];
+			var valuesString = stringify(values);
 			
-			expect(actualValue).to.equal(makeKey(values));
-			expectCounts([values, 1]);
-		});
-		
-		context('after was calculated once with values ' + valuesString, function () {
-			var j = (i + 1) % exampleValues.length;
-			var otherValues = exampleValues[j];
-			var otherValuesString = stringify(otherValues);
-			
-			beforeEach(function() {
-				computedValue.apply(null, values);
-			});
-
-			it('should not calculate second time', function () {
-				var actualValue = computedValue.apply(null, values);
-				
-				expect(actualValue).to.equal(makeKey(values));
-				expectCounts([values, 1]);
-			});
-
-			it('should calculate with values ' + otherValuesString, function () {
-				var actualValue = computedValue.apply(null, otherValues);
-				
-				expect(actualValue).to.equal(makeKey(otherValues));
-				expectCounts([values, 1], [otherValues, 1]);
-			});
-
-			it('should not calculate when passing trailing undefined values', function () {
-				var extendedValues = _(values).concat([undefined, undefined]).value();
-				var actualValue = computedValue.apply(null, extendedValues);
+			it('should calculate when requested with values ' + valuesString, function () {
+				var actualValue = invokeComputed(values);
 				
 				expect(actualValue).to.equal(makeKey(values));
 				expectCounts([values, 1]);
 			});
 			
-			context('after was calculated once with values ' + otherValuesString, function () {
+			context('after was calculated once with values ' + valuesString, function () {
+				var j = (i + 1) % exampleValues.length;
+				var otherValues = exampleValues[j];
+				var otherValuesString = stringify(otherValues);
+				
 				beforeEach(function() {
-					computedValue.apply(null, otherValues);
+					invokeComputed(values);
 				});
 
-				it('should not calculate second time with values ' + valuesString, function () {
-					var actualValue = computedValue.apply(null, values);
+				it('should not calculate second time', function () {
+					var actualValue = invokeComputed(values);
 					
 					expect(actualValue).to.equal(makeKey(values));
-					expectCounts([values, 1], [otherValues, 1]);
+					expectCounts([values, 1]);
 				});
 
-				it('should not calculate second time with values ' + otherValuesString, function () {
-					var actualValue = computedValue.apply(null, otherValues);
+				it('should calculate with values ' + otherValuesString, function () {
+					var actualValue = invokeComputed(otherValues);
 					
 					expect(actualValue).to.equal(makeKey(otherValues));
 					expectCounts([values, 1], [otherValues, 1]);
 				});
+
+				it('should not calculate when passing trailing undefined values', function () {
+					var extendedValues = _(values).concat([undefined, undefined]).value();
+					var actualValue = invokeComputed(extendedValues);
+					
+					expect(actualValue).to.equal(makeKey(values));
+					expectCounts([values, 1]);
+				});
+				
+				context('after was calculated once with values ' + otherValuesString, function () {
+					beforeEach(function() {
+						invokeComputed(otherValues);
+					});
+
+					it('should not calculate second time with values ' + valuesString, function () {
+						var actualValue = invokeComputed(values);
+						
+						expect(actualValue).to.equal(makeKey(values));
+						expectCounts([values, 1], [otherValues, 1]);
+					});
+
+					it('should not calculate second time with values ' + otherValuesString, function () {
+						var actualValue = invokeComputed(otherValues);
+						
+						expect(actualValue).to.equal(makeKey(otherValues));
+						expectCounts([values, 1], [otherValues, 1]);
+					});
+				});
 			});
-		});
+		};
+		
+		for(var i = 0; i < exampleValues.length; i++) {
+			defineTest(i);
+		}
 	};
 	
-	for(var i = 0; i < exampleValues.length; i++) {
-		defineTest(i);
-	}
+	describeUsageSyntax(function(parameters) {
+		return computedValue.apply(null, parameters);
+	});
 });
