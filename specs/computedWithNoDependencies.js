@@ -2,26 +2,27 @@
 var itDepends = require('../src/it-depends.js');
 
 describe('computed with no dependencies', function () {
-	var callCount;
+	var calls;
 	var computedValue;
 
-	beforeEach(function(){
-		callCount = 0;
+	beforeEach(function() {
+		var counter = { count: 0 };
+		calls = counter;
 
 		computedValue = itDepends.computed(function(){
-			callCount++;
+			counter.count++;
 			return 'Bob';
 		});
 	});
 
 	it('should not calculate when created', function () {
-		expect(callCount).to.equal(0);
+		expect(calls.count).to.equal(0);
 	});
 
 	it('should calculate when requested', function () {
 		var actualValue = computedValue();
 		expect(actualValue).to.equal('Bob');
-		expect(callCount).to.equal(1);
+		expect(calls.count).to.equal(1);
 	});
 
 	context('after was calculated once', function () {
@@ -32,7 +33,7 @@ describe('computed with no dependencies', function () {
 		it('should not calculate second time', function () {
 			var actualValue = computedValue();
 			expect(actualValue).to.equal('Bob');
-			expect(callCount).to.equal(1);
+			expect(calls.count).to.equal(1);
 		});
 	});
 	

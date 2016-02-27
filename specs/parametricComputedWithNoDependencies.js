@@ -3,7 +3,7 @@ var itDepends = require('../src/it-depends.js');
 var _ = require('lodash');
 
 describe('parametric computed with no dependencies', function () {
-	var callCounts;
+	var calls;
 	var computedValue;
 	
 	var stringify = function(values) {
@@ -66,23 +66,24 @@ describe('parametric computed with no dependencies', function () {
 		
 		for(var key in expectedCounts) {
 			if(expectedCounts.hasOwnProperty(key)) {
-				expect(callCounts[key]).to.equal(expectedCounts[key]);
+				expect(calls[key]).to.equal(expectedCounts[key]);
 			}
 		}
 		
-		for(var key in callCounts) {
-			if(callCounts.hasOwnProperty(key)) {
+		for(var key in calls) {
+			if(calls.hasOwnProperty(key)) {
 				expect(expectedCounts).to.include.keys(key);
 			}
 		}
 	};
 
 	beforeEach(function() {
-		callCounts = {};
-
+		var counter = {};
+		calls = counter;
+		
 		computedValue = itDepends.computed(function() {
 			var result = makeKey(arguments);
-			callCounts[result] = (callCounts[result] || 0) + 1;
+			counter[result] = (counter[result] || 0) + 1;
 			
 			return result;
 		});

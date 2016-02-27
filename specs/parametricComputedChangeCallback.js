@@ -2,11 +2,23 @@ var expect = require('chai').expect;
 var itDepends = require('../src/it-depends.js');
 var _ = require('lodash');
 
-describe('parameteric computed with single value dependency', function () {
+describe('parameteric computed change callback', function () {
 	var calls;
 	var observableValues;
 	var computedValue;
+	var subscription;
 
+	var expectLastChanges = function(expected) {
+		expect(calls.lastChange.changed).to.equal(expected.changed);
+		expect(calls.lastChange.from).to.equal(expected.from);
+		expect(calls.lastChange.to).to.equal(expected.to);
+		expect(calls.lastChange.args.length).to.equal(expected.args.length);
+		
+		for(var i = 0; i < calls.lastChange.args.length; i++) {
+			expect(calls.lastChange.args[i]).to.equal(expected.args[i]);
+		}
+	};
+	
 	var expectCalls = function(expectedCountPairs) {
 		var expectedCounts = _.zipObject(expectedCountPairs);
 		var expectedKeys = _.keys(expectedCounts);
@@ -17,7 +29,7 @@ describe('parameteric computed with single value dependency', function () {
 		}
 	};
 	
-	beforeEach(function(){
+	beforeEach(function() {
 		var counter = {};
 		calls = counter;
 
@@ -32,9 +44,21 @@ describe('parameteric computed with single value dependency', function () {
 				userId = 'anonymous';
 			}
 			
-			counter[userId] = (counter[userId] || 0) + 1;
 			return 'Hello, ' + observableValues[userId]();
 		});
+		
+		subscription = computedValue.onChange(function(changed, from, to, args) {
+			var userId = args[0];
+			if(userId === undefined) {
+				userId = 'anonymous';
+			}
+			
+			counter[userId] = (counter[userId] || 0) + 1;
+		});
+	});
+	
+	afterEach(function() {
+		subscription.disable();
 	});
 
 	var withParametersSpecName = function(value) {
@@ -57,84 +81,30 @@ describe('parameteric computed with single value dependency', function () {
 					originalValue = observableValue();
 				});
 			
-				it('should not calculate when created', function () {
+				it('should not be triggered when new subscription is created', function () {
+					expectCalls([]);
+				});
+
+				it('should not be triggered when observable is not changed', function () {
+					observableValue.write(originalValue);
 					expectCalls([]);
 				});
 				
-				it('should calculate when requested', function () {
-					var actualValue = invokeComputed(parameters);
-					expect(actualValue).to.equal('Hello, ' + originalValue);
-					expectCalls([parameterName, 1]);
-				});
-
-				context('after was calculated once', function () {
-					beforeEach(function(){
-						invokeComputed(parameters);
-					});
-
-					it('should not calculate second time if value dependency was not changed', function () {
-						var actualValue = invokeComputed(parameters);
-						expect(actualValue).to.equal('Hello, ' + originalValue);
-						expectCalls([parameterName, 1]);
-					});
-					
-					context('after value dependency was changed', function () {
-						beforeEach(function(){
-							observableValue.write('Jack');
-						});
-
-						it('should not recalculate immediately', function () {
-							expectCalls([parameterName, 1]);
-						});
-
-						it('should recalculate when requested', function () {
-							var actualValue = invokeComputed(parameters);
-							expect(actualValue).to.equal('Hello, Jack');
-							expectCalls([parameterName, 2]);
-						});
-
-						context('after value dependency was changed back immediatelly', function () {
-							beforeEach(function(){
-								observableValue.write(originalValue);
-							});
-
-							it('should not recalculate when requested', function () {
-								var actualValue = invokeComputed(parameters);
-								expect(actualValue).to.equal('Hello, ' + originalValue);
-								expectCalls([parameterName, 1]);
-							});
-						});
-					});
-				});
-
-				context('after value dependency was changed', function () {
-					beforeEach(function(){
+				context('when observable is changed', function() {
+					beforeEach(function() {
 						observableValue.write('Jack');
 					});
 
-					it('should not recalculate immediately', function () {
-						expectCalls([]);
-					});
-
-					it('should recalculate when requested', function () {
-						var actualValue = invokeComputed(parameters);
-						expect(actualValue).to.equal('Hello, Jack');
+					it('should be triggered once', function () {
 						expectCalls([parameterName, 1]);
+						expectLastChanges({ changed: computedValue.withNoArgs(), from: 'Hello, ' + originalValue, to: 'Hello, Jack', args: [] });
 					});
-					
-					context('after was recalculated', function () {
-						beforeEach(function(){
-							invokeComputed(parameters);
-						});
 
-						it('should not calculate second time if value dependency was not changed', function () {
-							var actualValue = invokeComputed(parameters);
-							expect(actualValue).to.equal('Hello, Jack');
-							expectCalls([parameterName, 1]);
-						});
-						
+					it('should be triggered once when changed back', function () {
+						observableValue.write(originalValue);
+						expectCalls([parameterName, 2]);
+						expectLastChanges({ changed: computedValue.withNoArgs(), from: 'Hello, Jack', to: 'Hello, Bob', args: [] });
 					});
-					
 				});
 			});
 		};
