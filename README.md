@@ -9,7 +9,7 @@
 Lightweight dependency tracking / caching library for JavaScript
 
 ## About the library
-**it-depends** library is the attempt to create a lightweight dependency tracking library that helps you organize your JavaScript code using the approach to build a model proposed in [KnockoutJS](http://knockoutjs.com/documentation/computedObservables.html)
+**it-depends** library is a lightweight general purpose dependency tracking library that helps you organize your JavaScript code using the approach to build a model proposed in [KnockoutJS](http://knockoutjs.com/documentation/computedObservables.html)
 
 **it-depends** does not worry about UI - it is solely for managing dependencies between data/model elements.
 
