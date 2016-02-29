@@ -1,5 +1,6 @@
 var expect = require('chai').expect;
 var itDepends = require('../src/it-depends.js');
+var _ = require('lodash');
 
 describe('computed value change callback', function () {
 	var calls;
@@ -11,9 +12,15 @@ describe('computed value change callback', function () {
 		expect(calls.lastChange.changed).to.equal(expected.changed);
 		expect(calls.lastChange.from).to.equal(expected.from);
 		expect(calls.lastChange.to).to.equal(expected.to);
-		expect(calls.lastChange.args.length).to.equal(expected.args.length);
+		var expectedCount = _(expected.args)
+			.dropRightWhile(function(x) {
+				return x === undefined;
+			})
+			.size();
+			
+		expect(calls.lastChange.args.length).to.equal(expectedCount);
 		
-		for(var i = 0; i < calls.lastChange.args.length; i++) {
+		for(var i = 0; i < expectedCount; i++) {
 			expect(calls.lastChange.args[i]).to.equal(expected.args[i]);
 		}
 	};

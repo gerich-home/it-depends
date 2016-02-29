@@ -72,6 +72,19 @@ var createComputed = function(calculator, args) {
 
 		return currentValue;
 	};
+	
+	self.onChange = function(handler) {
+		var oldValue = self();
+		
+		return library.onChange(function() {
+			var newValue = self();
+			
+			if(newValue !== oldValue) {
+				handler(self, oldValue, newValue, args);
+				oldValue = newValue;
+			}
+		});
+	};
 
 	return self;
 };
@@ -137,17 +150,7 @@ var library = {
 		};
 		
 		self.onChange = function(handler) {
-			var computedWithNoArgs = self.withNoArgs();
-			var oldValue = computedWithNoArgs();
-			
-			return library.onChange(function() {
-				var newValue = computedWithNoArgs();
-				
-				if(newValue !== oldValue) {
-					handler(computedWithNoArgs, oldValue, newValue, []);
-					oldValue = newValue;
-				}
-			});
+			return self.withNoArgs().onChange(handler);
 		};
 		
 		self.withNoArgs = function() {
@@ -157,14 +160,18 @@ var library = {
 		self.withArgs = function() {
 			var key = '';
 			var skippingUndefinedValues = true;
+			var argsToDrop = 0;
 			
 			for(var i = arguments.length - 1; i >= 0; i--) {
 				var arg = arguments[i];
-				if(skippingUndefinedValues && arg === undefined) {
-					continue;
+				if(skippingUndefinedValues) {
+					if(arg === undefined) {
+						argsToDrop++
+						continue;
+					}
+					
+					skippingUndefinedValues = false;
 				}
-				
-				skippingUndefinedValues = false;
 				
 				var index = allArguments.indexOf(arg);
 			
@@ -176,7 +183,7 @@ var library = {
 				}
 			}
 			
-			var args = arguments;
+			var args = Array.prototype.slice.call(arguments, 0, arguments.length - argsToDrop);
 			return cache[key] || (cache[key] = createComputed(calculator, args));
 		};
 		

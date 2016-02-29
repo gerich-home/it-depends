@@ -105,6 +105,14 @@ describe('parametric computed with no dependencies', function () {
 				expectCounts([values, 1]);
 			});
 			
+			it('should calculate when passing trailing undefined values', function () {
+				var extendedValues = _(values).concat([undefined, undefined]).value();
+				var actualValue = invokeComputed(extendedValues);
+				
+				expect(actualValue).to.equal(makeKey(values));
+				expectCounts([values, 1]);
+			});
+			
 			context('after was calculated once with values ' + valuesString, function () {
 				var j = (i + 1) % exampleValues.length;
 				var otherValues = exampleValues[j];

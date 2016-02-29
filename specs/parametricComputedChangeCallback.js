@@ -12,9 +12,15 @@ describe('parameteric computed change callback', function () {
 		expect(calls.lastChange.changed).to.equal(expected.changed);
 		expect(calls.lastChange.from).to.equal(expected.from);
 		expect(calls.lastChange.to).to.equal(expected.to);
-		expect(calls.lastChange.args.length).to.equal(expected.args.length);
+		var expectedCount = _(expected.args)
+			.dropRightWhile(function(x) {
+				return x === undefined;
+			})
+			.size();
+			
+		expect(calls.lastChange.args.length).to.equal(expectedCount);
 		
-		for(var i = 0; i < calls.lastChange.args.length; i++) {
+		for(var i = 0; i < expectedCount; i++) {
 			expect(calls.lastChange.args[i]).to.equal(expected.args[i]);
 		}
 	};
@@ -22,17 +28,14 @@ describe('parameteric computed change callback', function () {
 	var expectCalls = function(expectedCountPairs) {
 		var expectedCounts = _.zipObject(expectedCountPairs);
 		var expectedKeys = _.keys(expectedCounts);
-		var actualKeys = _.keys(calls);
+		var actualKeys = _.keys(calls.counts);
 		
 		for(var key in _.union(expectedKeys, actualKeys)) {
-			expect(calls[key] || 0).to.equal(expectedCounts[key] || 0);
+			expect(calls.counts[key] || 0).to.equal(expectedCounts[key] || 0);
 		}
 	};
 	
 	beforeEach(function() {
-		var counter = {};
-		calls = counter;
-
 		observableValues = {
 			quickFox: itDepends.value('Bob'),
 			lazyDog: itDepends.value('James'),
@@ -45,15 +48,6 @@ describe('parameteric computed change callback', function () {
 			}
 			
 			return 'Hello, ' + observableValues[userId]();
-		});
-		
-		subscription = computedValue.onChange(function(changed, from, to, args) {
-			var userId = args[0];
-			if(userId === undefined) {
-				userId = 'anonymous';
-			}
-			
-			counter[userId] = (counter[userId] || 0) + 1;
 		});
 	});
 	
@@ -69,72 +63,72 @@ describe('parameteric computed change callback', function () {
 		return 'with no parameters';
 	};
 	
-	var describeUsageSyntax = function(invokeComputed) {
-		var describeCalledWithParameters = function(expectCalls, parameterValue, parameterName) {
-			var parameters = [parameterValue];
-			var observableValue;
-			var originalValue;
-			
-			context(withParametersSpecName(parameterValue), function () {
-				beforeEach(function(){
-					observableValue = observableValues[parameterName];
-					originalValue = observableValue();
-				});
-			
-				it('should not be triggered when new subscription is created', function () {
-					expectCalls([]);
-				});
-
-				it('should not be triggered when observable is not changed', function () {
-					observableValue.write(originalValue);
-					expectCalls([]);
-				});
-				
-				context('when observable is changed', function() {
-					beforeEach(function() {
-						observableValue.write('Jack');
-					});
-
-					it('should be triggered once', function () {
-						expectCalls([parameterName, 1]);
-						expectLastChanges({ changed: computedValue.withNoArgs(), from: 'Hello, ' + originalValue, to: 'Hello, Jack', args: [] });
-					});
-
-					it('should be triggered once when changed back', function () {
-						observableValue.write(originalValue);
-						expectCalls([parameterName, 2]);
-						expectLastChanges({ changed: computedValue.withNoArgs(), from: 'Hello, Jack', to: 'Hello, Bob', args: [] });
-					});
-				});
-			});
-		};
-
-		var describeComputedWithParameter = function(otherParameterName, otherParameterValue, parameterValue, parameterName) {
-			context('after was computed ' + withParametersSpecName(otherParameterValue), function () {
-				beforeEach(function(){
-					computedValue(otherParameterValue);
-				});
-				
-				describeCalledWithParameters(function(expected) {
-					expectCalls(_.concat([otherParameterName, 1], expected));
-				}, parameterValue, parameterName);
-			});
-		};
+	var describeCalledWithParameters = function(parameterValue, parameterName) {
+		var parameters = [parameterValue];
+		var observableValue;
+		var originalValue;
+		var computedValueWithArgs;
 		
-		describeCalledWithParameters(expectCalls, undefined, 'anonymous');
-		describeCalledWithParameters(expectCalls, 'quickFox', 'quickFox');
-		describeComputedWithParameter(undefined, 'anonymous', 'quickFox', 'quickFox');
-		describeComputedWithParameter('quickFox', 'quickFox', undefined, 'anonymous');
-		describeComputedWithParameter('quickFox', 'quickFox', 'lazyDog', 'lazyDog');
+		context(withParametersSpecName(parameterValue), function () {
+			beforeEach(function(){
+				observableValue = observableValues[parameterName];
+				originalValue = observableValue();
+				computedValueWithArgs = computedValue.withArgs.apply(null, parameters);
+				
+				var callsSpy = {
+					counts: {}
+				};
+				calls = callsSpy;
+				
+				subscription = computedValueWithArgs.onChange(function(changed, from, to, args) {
+					var userId = args[0];
+					if(userId === undefined) {
+						userId = 'anonymous';
+					}
+					
+					callsSpy.counts[userId] = (callsSpy.counts[userId] || 0) + 1;
+					callsSpy.lastChange = { changed: changed, from: from, to: to, args: args };
+				});
+			});
+		
+			it('should not be triggered when new subscription is created', function () {
+				expectCalls([]);
+			});
+
+			it('should not be triggered when observable is not changed', function () {
+				observableValue.write(originalValue);
+				expectCalls([]);
+			});
+			
+			context('when observable is changed', function() {
+				beforeEach(function() {
+					observableValue.write('Jack');
+				});
+
+				it('should be triggered once', function () {
+					expectCalls([parameterName, 1]);
+					expectLastChanges({ changed: computedValueWithArgs, from: 'Hello, ' + originalValue, to: 'Hello, Jack', args: parameters });
+				});
+
+				it('should be triggered again when changed back', function () {
+					observableValue.write(originalValue);
+					expectCalls([parameterName, 2]);
+					expectLastChanges({ changed: computedValueWithArgs, from: 'Hello, Jack', to: 'Hello, ' + originalValue, args: parameters });
+				});
+			});
+			
+			context('when other observable is changed', function() {
+				beforeEach(function() {
+					observableValues.lazyDog.write('Jack');
+				});
+
+				it('should be triggered once', function () {
+					expectCalls();
+				});
+			});
+		});
 	};
 	
-	describeUsageSyntax(function(parameters) {
-		return computedValue.apply(null, parameters);
-	});
-	
-	describeUsageSyntax(function(parameters) {
-		var nestedComputed = computedValue.withArgs.apply(null, parameters);
-		
-		return nestedComputed();
-	});
+	describeCalledWithParameters(undefined, 'anonymous');
+	describeCalledWithParameters('quickFox', 'quickFox');
 });
