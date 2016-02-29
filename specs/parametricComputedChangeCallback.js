@@ -50,10 +50,6 @@ describe('parameteric computed change callback', function () {
 			return 'Hello, ' + observableValues[userId]();
 		});
 	});
-	
-	afterEach(function() {
-		subscription.disable();
-	});
 
 	var withParametersSpecName = function(value) {
 		if(value) {
@@ -78,9 +74,9 @@ describe('parameteric computed change callback', function () {
 				var callsSpy = {
 					counts: {}
 				};
-				calls = callsSpy;
 				
-				subscription = computedValueWithArgs.onChange(function(changed, from, to, args) {
+				calls = callsSpy;
+				var changeHandler = function(changed, from, to, args) {
 					var userId = args[0];
 					if(userId === undefined) {
 						userId = 'anonymous';
@@ -88,9 +84,17 @@ describe('parameteric computed change callback', function () {
 					
 					callsSpy.counts[userId] = (callsSpy.counts[userId] || 0) + 1;
 					callsSpy.lastChange = { changed: changed, from: from, to: to, args: args };
-				});
+				};
+				
+				subscription = computedValueWithArgs.onChange(changeHandler);
+				otherSubscription = computedValue.withArgs('lazyDog').onChange(changeHandler);
 			});
-		
+			
+			afterEach(function(){
+				subscription.disable();
+				otherSubscription.disable();
+			});
+			
 			it('should not be triggered when new subscription is created', function () {
 				expectCalls([]);
 			});
@@ -114,6 +118,31 @@ describe('parameteric computed change callback', function () {
 					observableValue.write(originalValue);
 					expectCalls([parameterName, 2]);
 					expectLastChanges({ changed: computedValueWithArgs, from: 'Hello, Jack', to: 'Hello, ' + originalValue, args: parameters });
+				});
+			});
+	
+			context('when disabled', function() {
+				beforeEach(function() {
+					subscription.disable();
+				});
+			
+				it('should not be triggered when observable is changed', function () {
+					observableValue.write('Jack');
+					
+					expectCalls();
+				});
+
+				context('when enabled back', function() {
+					beforeEach(function() {
+						subscription.enable();
+					});
+				
+					it('should be triggered when observable is changed', function () {
+						observableValue.write('Jack');
+						
+						expectCalls([parameterName, 1]);
+						expectLastChanges({ changed: computedValueWithArgs, from: 'Hello, ' + originalValue, to: 'Hello, Jack', args: parameters });
+					});
 				});
 			});
 			
