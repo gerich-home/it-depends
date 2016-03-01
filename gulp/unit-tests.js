@@ -3,7 +3,9 @@ var mocha = require('gulp-mocha');
 var cover = require('gulp-coverage');
 
 function mochaReporter() {
-    return 'spec';
+    return process.env.APPVEYOR === 'True'
+        ? 'mocha-appveyor-reporter'
+        : 'spec';
 }
 
 gulp.task('unit-tests', [], function() {
