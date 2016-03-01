@@ -3,7 +3,7 @@
 var handlers = {};
 var nextHandlerId = 0;
 
-module.exports = {
+export = {
 	subscribe: function(handler) {
 		var handlerId = ++nextHandlerId;
 		
