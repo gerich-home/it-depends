@@ -7,16 +7,18 @@ describe('usage of the library in the real world scenarios', function () {
 		var b;
 		var c;
 		var d;
-		var callCount;
+		var calls;
 		
 		beforeEach(function() {
-			callCount = 0;
+			var counter = { count: 0 };
+			calls = counter;
+			
 			a = itDepends.value(1);
 			b = itDepends.value(2);
 			c = itDepends.value(3);
 			
 			d = itDepends.computed(function() {
-				++callCount;
+				++counter.count;
 				if(a() === 1) {
 					return b();
 				}
@@ -27,14 +29,14 @@ describe('usage of the library in the real world scenarios', function () {
 		});
 			
 		it('should not recalculate immediately', function () {
-			expect(callCount).to.equal(0);
+			expect(calls.count).to.equal(0);
 		});
 			
 		it('should recalculate when requested', function () {
 			var actualValue = d();
 			
 			expect(actualValue).to.equal(2);
-			expect(callCount).to.equal(1);
+			expect(calls.count).to.equal(1);
 		});
 		
 		context('after changes are made', function () {		
@@ -45,14 +47,14 @@ describe('usage of the library in the real world scenarios', function () {
 			});
 			
 			it('should not recalculate immediately', function () {
-				expect(callCount).to.equal(0);
+				expect(calls.count).to.equal(0);
 			});
 			
 			it('should recalculate once when requested', function () {
 				var actualValue = d();
 				
 				expect(actualValue).to.equal(6);
-				expect(callCount).to.equal(1);
+				expect(calls.count).to.equal(1);
 			});
 			
 			it('should not recalculate when requested second time', function () {
@@ -60,7 +62,7 @@ describe('usage of the library in the real world scenarios', function () {
 				var actualValue = d();
 				
 				expect(actualValue).to.equal(6);
-				expect(callCount).to.equal(1);
+				expect(calls.count).to.equal(1);
 			});
 		});
 		
@@ -75,7 +77,7 @@ describe('usage of the library in the real world scenarios', function () {
 				var actualValue = d();
 				
 				expect(actualValue).to.equal(2);
-				expect(callCount).to.equal(1);
+				expect(calls.count).to.equal(1);
 			});
 		});
 	});

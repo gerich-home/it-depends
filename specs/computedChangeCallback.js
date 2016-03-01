@@ -1,5 +1,6 @@
 var expect = require('chai').expect;
 var itDepends = require('../src/it-depends.js');
+var _ = require('lodash');
 
 describe('computed value change callback', function () {
 	var calls;
@@ -11,6 +12,17 @@ describe('computed value change callback', function () {
 		expect(calls.lastChange.changed).to.equal(expected.changed);
 		expect(calls.lastChange.from).to.equal(expected.from);
 		expect(calls.lastChange.to).to.equal(expected.to);
+		var expectedCount = _(expected.args)
+			.dropRightWhile(function(x) {
+				return x === undefined;
+			})
+			.size();
+			
+		expect(calls.lastChange.args.length).to.equal(expectedCount);
+		
+		for(var i = 0; i < expectedCount; i++) {
+			expect(calls.lastChange.args[i]).to.equal(expected.args[i]);
+		}
 	};
 
 	beforeEach(function() {
@@ -22,9 +34,9 @@ describe('computed value change callback', function () {
 			return "Hello, " + observableValue();
 		});
 
-		subscription = computedValue.onChange(function(changed, from, to) {
+		subscription = computedValue.onChange(function(changed, from, to, args) {
 			callsSpy.count++;
-			callsSpy.lastChange = { changed: changed, from: from, to: to };
+			callsSpy.lastChange = { changed: changed, from: from, to: to, args: args };
 		});
 	});
 	
@@ -48,13 +60,13 @@ describe('computed value change callback', function () {
 
 		it('should be triggered once', function () {
 			expect(calls.count).to.equal(1);
-			expectLastChanges({ changed: computedValue, from: 'Hello, Bob', to: 'Hello, Jack' });
+			expectLastChanges({ changed: computedValue.withNoArgs(), from: 'Hello, Bob', to: 'Hello, Jack', args: [] });
 		});
 
 		it('should be triggered once when changed back', function () {
 			observableValue.write('Bob');
 			expect(calls.count).to.equal(2);
-			expectLastChanges({ changed: computedValue, from: 'Hello, Jack', to: 'Hello, Bob' });
+			expectLastChanges({ changed: computedValue.withNoArgs(), from: 'Hello, Jack', to: 'Hello, Bob', args: [] });
 		});
 	});
 	
@@ -85,7 +97,7 @@ describe('computed value change callback', function () {
 				observableValue.write('Jack');
 				
 				expect(calls.count).to.equal(1);
-				expectLastChanges({ changed: computedValue, from: 'Hello, Bob', to: 'Hello, Jack' });
+				expectLastChanges({ changed: computedValue.withNoArgs(), from: 'Hello, Bob', to: 'Hello, Jack', args: [] });
 			});
 		});
 	});
