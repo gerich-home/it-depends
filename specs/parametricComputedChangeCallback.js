@@ -48,7 +48,7 @@ describe('parameteric computed change callback', function () {
 		observableValues = {
 			quickFox: itDepends.value('Bob'),
 			lazyDog: itDepends.value('James'),
-			anonymous: itDepends.value('Incognito'),
+			anonymous: itDepends.value('Incognito')
 		};
 
 		computedValue = itDepends.computed(function(userId) {
