@@ -25,14 +25,23 @@ describe('parameteric computed change callback', function () {
 		}
 	};
 	
-	var expectCalls = function(expectedCountPairs) {
-		var expectedCounts = _.zipObject(expectedCountPairs);
+	var expectCalls = function() {
+		var expectedCounts = {};
+		for(var i = 0; i < arguments.length; i++) {
+			var arg = arguments[i];
+			var key = arg[0];
+			expect(expectedCounts).to.not.include.keys(key);
+			expectedCounts[key] = arg[1];
+		}
+		
 		var expectedKeys = _.keys(expectedCounts);
 		var actualKeys = _.keys(calls.counts);
 		
-		for(var key in _.union(expectedKeys, actualKeys)) {
-			expect(calls.counts[key] || 0).to.equal(expectedCounts[key] || 0);
-		}
+		_(expectedKeys)
+			.union(actualKeys)
+			.forEach(function(key) {
+				expect(calls.counts[key] || 0).to.equal(expectedCounts[key] || 0);
+			});
 	};
 	
 	beforeEach(function() {
@@ -96,12 +105,12 @@ describe('parameteric computed change callback', function () {
 			});
 			
 			it('should not be triggered when new subscription is created', function () {
-				expectCalls([]);
+				expectCalls();
 			});
 
 			it('should not be triggered when observable is not changed', function () {
 				observableValue.write(originalValue);
-				expectCalls([]);
+				expectCalls();
 			});
 			
 			context('when observable is changed', function() {
@@ -151,8 +160,8 @@ describe('parameteric computed change callback', function () {
 					observableValues.lazyDog.write('Jack');
 				});
 
-				it('should be triggered once', function () {
-					expectCalls();
+				it('should not be triggered', function () {
+					expectCalls(['lazyDog', 1]);
 				});
 			});
 		});

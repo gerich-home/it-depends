@@ -64,17 +64,14 @@ describe('parametric computed with no dependencies', function () {
 			expectedCounts[key] = arg[1];
 		}
 		
-		for(var key in expectedCounts) {
-			if(expectedCounts.hasOwnProperty(key)) {
-				expect(calls[key]).to.equal(expectedCounts[key]);
-			}
-		}
+		var expectedKeys = _.keys(expectedCounts);
+		var actualKeys = _.keys(calls);
 		
-		for(var key in calls) {
-			if(calls.hasOwnProperty(key)) {
-				expect(expectedCounts).to.include.keys(key);
-			}
-		}
+		_(expectedKeys)
+			.union(actualKeys)
+			.forEach(function(key) {
+				expect(calls[key] || 0).to.equal(expectedCounts[key] || 0);
+			});
 	};
 
 	beforeEach(function() {

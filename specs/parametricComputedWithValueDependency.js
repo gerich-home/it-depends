@@ -7,14 +7,23 @@ describe('parameteric computed with single value dependency', function () {
 	var observableValues;
 	var computedValue;
 
-	var expectCalls = function(expectedCountPairs) {
-		var expectedCounts = _.zipObject(expectedCountPairs);
+	var expectCalls = function() {
+		var expectedCounts = {};
+		for(var i = 0; i < arguments.length; i++) {
+			var arg = arguments[i];
+			var key = arg[0];
+			expect(expectedCounts).to.not.include.keys(key);
+			expectedCounts[key] = arg[1];
+		}
+		
 		var expectedKeys = _.keys(expectedCounts);
 		var actualKeys = _.keys(calls);
 		
-		for(var key in _.union(expectedKeys, actualKeys)) {
-			expect(calls[key] || 0).to.equal(expectedCounts[key] || 0);
-		}
+		_(expectedKeys)
+			.union(actualKeys)
+			.forEach(function(key) {
+				expect(calls[key] || 0).to.equal(expectedCounts[key] || 0);
+			});
 	};
 	
 	beforeEach(function(){
@@ -58,7 +67,7 @@ describe('parameteric computed with single value dependency', function () {
 				});
 			
 				it('should not calculate when created', function () {
-					expectCalls([]);
+					expectCalls();
 				});
 				
 				it('should calculate when requested', function () {
@@ -113,7 +122,7 @@ describe('parameteric computed with single value dependency', function () {
 					});
 
 					it('should not recalculate immediately', function () {
-						expectCalls([]);
+						expectCalls();
 					});
 
 					it('should recalculate when requested', function () {
@@ -139,14 +148,15 @@ describe('parameteric computed with single value dependency', function () {
 			});
 		};
 
-		var describeComputedWithParameter = function(otherParameterName, otherParameterValue, parameterValue, parameterName) {
+		var describeComputedWithParameter = function(otherParameterValue, otherParameterName, parameterValue, parameterName) {
 			context('after was computed ' + withParametersSpecName(otherParameterValue), function () {
 				beforeEach(function(){
 					computedValue(otherParameterValue);
 				});
 				
-				describeCalledWithParameters(function(expected) {
-					expectCalls(_.concat([otherParameterName, 1], expected));
+				describeCalledWithParameters(function() {
+					var extendedExpectedCalls = _.concat([[otherParameterName, 1]], Array.prototype.slice.call(arguments, 0));
+					expectCalls.apply(null, extendedExpectedCalls);
 				}, parameterValue, parameterName);
 			});
 		};

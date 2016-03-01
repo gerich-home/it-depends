@@ -5,9 +5,9 @@ var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var header = require('gulp-header');
 var fs = require('fs');
+var pkg = require('../package.json');
 
 var addLicense = function() {
-    var pkg = require('../package.json');
 	return header(fs.readFileSync('./license.txt', 'utf8'), pkg);
 };
 

@@ -7,7 +7,7 @@ function updateVersionTask(name, importance) {
             .pipe(plugins.bump({ type: importance }))
             .pipe(gulp.dest('./'));
     });
-};
+}
 
 updateVersionTask('patch', 'patch');
 updateVersionTask('feature', 'minor');

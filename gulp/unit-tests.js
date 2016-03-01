@@ -4,7 +4,7 @@ var cover = require('gulp-coverage');
 
 function mochaReporter() {
     return 'spec';
-};
+}
 
 gulp.task('unit-tests', [], function() {
     return gulp.src('specs/index.js')
