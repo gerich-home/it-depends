@@ -3,9 +3,9 @@
   "version": "3.3.0",
   "description": "Lightweight dependency tracking library for JavaScript",
   "files": [
-    "src"
+    "out/dist"
   ],
-  "main": "src/it-depends.js",
+  "main": "out/dist/it-depends.js",
   "dependencies": {},
   "devDependencies": {
     "browserify": "^13.0.0",

@@ -10,11 +10,6 @@ init:
   - ps: $env:ITDEPENDS_MASTER_NOT_PR = (($env:ITDEPENDS_IS_MASTER -eq 'True') -and (-not ($env:ITDEPENDS_IS_PR -eq 'True')))
 
 install:
-  - ps: Write-Host ("APPVEYOR_REPO_BRANCH:", $env:APPVEYOR_REPO_BRANCH)
-  - ps: Write-Host ("APPVEYOR_REPO_TAG_NAME:", $env:APPVEYOR_REPO_TAG_NAME)
-  - ps: Write-Host ("ITDEPENDS_IS_PR:", $env:ITDEPENDS_IS_PR)
-  - ps: Write-Host ("ITDEPENDS_IS_MASTER:", $env:ITDEPENDS_IS_MASTER)
-  - ps: Write-Host ("ITDEPENDS_MASTER_NOT_PR:", $env:ITDEPENDS_MASTER_NOT_PR)
   - ps: >-
       if($env:ITDEPENDS_IS_PR -eq 'False') {
          ./build/tools/decrypt-files.ps1
@@ -29,7 +24,7 @@ test_script:
 build: off
 
 artifacts:
-  - path: 'out\build\*.js'
+  - path: 'out\dist\*.js'
     name: it-depends-library
   - path: 'out\reports\coverage.html'
     name: coverage-html
