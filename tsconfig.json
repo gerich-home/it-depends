@@ -1,7 +1,8 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "noImplicitAny": true,
+        "declaration": true,
+        "noExternalResolve": true,
         "removeComments": true,
         "preserveConstEnums": true,
         "sourceMap": true

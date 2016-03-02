@@ -1,11 +1,32 @@
 'use strict';
 
-var tracking = require('./tracking');
-var changeNotification = require('./changeNotification');
+import * as tracking from './tracking';
+import * as changeNotification from './changeNotification';
 
-module.exports = function(calculator, args) {
-	var currentValue;
-	var dependencies;
+export type ISubscription = changeNotification.ISubscription;
+
+export interface IComputedValueChangeHandler<T> {
+	(changed: IComputedValue<T>, from: T, to: T, args: any[]): void;
+}
+
+export interface IComputedValue<T> extends changeNotification.IHasValue<T> {
+	onChange(handler: IComputedValueChangeHandler<T>): ISubscription;
+}
+
+export default function computed<T>(calculator: (...params: any[]) => T, args: any[]): IComputedValue<T> {
+	var currentValue: T;
+
+	interface IDependency {
+		observableValue: changeNotification.IHasValue<any>,
+		capturedValue: any
+	}
+
+	interface IDependencyHash {
+		[id: number]: IDependency
+	}
+	
+	var dependencies: IDependencyHash;
+	
 	var id = tracking.takeNextObservableId();
 	var lastReadVersion = -1;
 
@@ -24,7 +45,7 @@ module.exports = function(calculator, args) {
 		return false;
 	};
 
-	var self = function() {
+	var self = <IComputedValue<T>>function() {
 		var needRecalc = function() {
 			return lastReadVersion !== tracking.lastWriteVersion &&
 				(!dependencies || atLeastOneDependencyChanged())
@@ -55,7 +76,7 @@ module.exports = function(calculator, args) {
 		return currentValue;
 	};
 	
-	self.onChange = function(handler) {
+	self.onChange = function(handler: IComputedValueChangeHandler<T>): ISubscription {
 		var oldValue = self();
 		
 		return changeNotification.subscribe(function() {
