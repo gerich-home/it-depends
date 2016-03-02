@@ -1,5 +1,5 @@
 var expect = require('chai').expect;
-var itDepends = require('../src/it-depends.js');
+var itDepends = require('../out/build/it-depends.js');
 
 describe('computed unrelated to other computed and value', function () {
 	var calls;

@@ -6,30 +6,16 @@ var buffer = require('vinyl-buffer');
 var header = require('gulp-header');
 var fs = require('fs');
 var pkg = require('../package.json');
-var ts = require('gulp-typescript');
-var merge = require('merge2');
 
 var addLicense = function() {
 	return header(fs.readFileSync('./license.txt', 'utf8'), pkg);
 };
 
-gulp.task('build-ts', function() {
-	var tsProject = ts.createProject('./tsconfig.json');
-	
-	var tsResult = gulp.src('src/*.ts')
-		.pipe(ts(tsProject));
- 
-	return merge([
-		tsResult.dts.pipe(gulp.dest('./out/definitions')),
-		tsResult.js.pipe(gulp.dest('./out/build'))
-	]);
-});
-
 gulp.task('build', ['build-ts'], function() {
-    var outputDir = './out/build';
+    var outputDir = './out/dist';
     var libraryName = 'it-depends';
 	var b = browserify({
-		entries: './src/' + libraryName + '.js',
+		entries: './out/build/' + libraryName + '.js',
 		standalone: 'itDepends'
 	});
 	

@@ -90,4 +90,4 @@ export default function computed<T>(calculator: (...params: any[]) => T, args: a
 	};
 
 	return self;
-};
+}

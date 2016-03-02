@@ -1,5 +1,5 @@
 ﻿var expect = require('chai').expect;
-var itDepends = require('../../out/build/it-depends.js');
+var itDepends = require('../../out/dist/it-depends.js');
 
 describe('itDepends library required in NodeJS environment', function () {
 

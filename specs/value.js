@@ -1,5 +1,5 @@
 var expect = require('chai').expect;
-var itDepends = require('../src/it-depends.js');
+var itDepends = require('../out/build/it-depends.js');
 
 describe('value', function () {
 	it('should store initial value', function () {

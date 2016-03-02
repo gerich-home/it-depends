@@ -1,5 +1,5 @@
 var expect = require('chai').expect;
-var itDepends = require('../src/it-depends.js');
+var itDepends = require('../out/build/it-depends.js');
 var _ = require('lodash');
 
 describe('parameteric computed with single value dependency', function () {

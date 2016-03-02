@@ -1,17 +1,17 @@
 'use strict';
 
-import computed, * as computedTypes from './computed';
+import computed, * as computedTypes from './computed'
 
 export interface IParametricComputedValue<TWithNoArgs> extends computedTypes.IComputedValue<TWithNoArgs> {
 	onChange(handler: computedTypes.IComputedValueChangeHandler<TWithNoArgs>): computedTypes.ISubscription;
 	withNoArgs(): computedTypes.IComputedValue<TWithNoArgs>;
 	withArgs<TWithArgs>(...args: any[]): computedTypes.IComputedValue<TWithArgs>;
-};
+}
 
 export default function<TWithNoArgs>(calculator: (...params: any[]) => TWithNoArgs): IParametricComputedValue<TWithNoArgs> {
 	interface IComputedHash {
 		[id: string]: computedTypes.IComputedValue<any>
-	};
+	}
 	
 	var cache: IComputedHash = {};
 	var allArguments = [];
@@ -60,4 +60,4 @@ export default function<TWithNoArgs>(calculator: (...params: any[]) => TWithNoAr
 	};
 	
 	return self;
-};
+}

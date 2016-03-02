@@ -8,10 +8,10 @@ function mochaReporter() {
         : 'spec';
 }
 
-gulp.task('unit-tests', [], function() {
+gulp.task('unit-tests', ['build'], function() {
     return gulp.src('specs/index.js')
 		.pipe(cover.instrument({
-			pattern: ['src/**/*.js']
+			pattern: ['out/build/*.js']
 		}))
         .pipe(mocha({
             reporter: mochaReporter()
