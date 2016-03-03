@@ -30,9 +30,7 @@ You are OK with building code that way (it looks similar to [Functional Programm
 
 You have some state that should be calculated on demand only and you do not want to clutter your code with additional caching logic.
 
-You use a framework that is responsible for rendering the model on the screen.
-
-Limitation(**to be removed**): the framework is built in Angular way - it makes decisions when it is better to query data from the model by itself and **does not require** you to notify that some value has changed (see #3, #5 - when they will be implemented, the limitation will be removed)
+You use a framework (such as AngularJs) that is responsible for rendering the model on the screen **or** you manage rendering by yourself (either by subscribing to the changes in desired values like it is done in KnockoutJS or by running event loop like it is done in AngularJS).
 
 ## History
 I created the library when I was refactoring one of complex screens in an [AngularJS](https://angularjs.org/) application.
@@ -51,7 +49,7 @@ After that I allowed AngularJS to query my `$scope` so that it could get actual 
 #### [NodeJS](https://nodejs.org/)
 
 ```
-npm install it-depends
+npm install it-depends --save
 ```
 
 In your application include the module and use it:
@@ -107,13 +105,15 @@ Creates observable value object.
 * `initialValue` *(optional, any value, undefined by default)* - the value to be stored in the observable when created.
 
 #### Returns:
-the `observable` value object.
+Type: `observableValue`.
+The observable value object.
 
 ### `observableValue()`
 Reads the current value of observable value object.
 
 #### Returns:
-the current value of observable value object.
+Type: `any`.
+The current value of observable value object.
 
 ### `observableValue.write(newValue)`
 Updates the current value of observable value object.
@@ -122,26 +122,45 @@ Updates the current value of observable value object.
 * `newValue` *(mandatory, any value)* - the new value to write to observable value object.
 
 #### Returns:
-*void*
+Type: `void`.
 
 ### `itDepends.computed(calculator)`
 Creates computed value object.
 
 #### Parameters:
-* `calculator` *(mandatory, function (...parameters: any[]) -> any)* - the function that will be called later to (re)calculate the value of computed. Gets called when you request the value for the first time, or when you request the value when some of dependencies (values/computeds) was changed. Should return(calculate) the current value of the computed value object. **Must not** have side-effects. Calculator function can take parameters. In this case the resulting computed behaves as a set of elementary computeds bound to each distinct set of arguments.
+* `calculator` *(mandatory, function (...parameters: any[]) -> any)* - the function that will be called later to (re)calculate the value of computed. Gets called when you request the value for the first time, or when you request the value when some of dependencies (values/computeds) was changed. Should return(calculate) the current value of the computed value object. **Must not** have side-effects. Calculator function can take parameters. In this case the resulting computed behaves as a set of elementary computeds bound to each distinct set of arguments. These individual computeds can be accessed with `withArgs` and `withNoArgs` methods.
 
 #### Returns:
-the `computed` value object.
+Type: `computedValue`.
+The computed value object.
 
 ### `computedValue(...parameters)`
 Reads the current value of computed value object for the given set of parameters. `calculator` will be called if it is the first call or if a change was made to some of the dependencies (values/computeds) called from calculator previous time. Otherwise the cached current value will be returned.
 During the call dependencies (values/computeds) used in the calculator will be recorded and stored in the list of dependencies.
 
 #### Parameters:
-* `parameters` *(varadic, any[])* - parameters that will be passed to the `calculator`. Calculator will be called only once for each unique set of parameters unless dependencies are changed. 
+* `parameters` *(varadic, any[])* - parameters that will be passed to the `calculator`. Calculator will be called only once for each unique set of parameters unless dependencies are changed. Trailing `undefined` values are dropped.
 
 #### Returns:
-the current value of computed value object for the given parameters.
+Type: `any`.
+The current value of computed value object for the given parameters.
+
+### `computedValue.withArgs(...parameters)`
+Returns the computed value object for the fixed set of parameters. `parameters` denote the set of arguments that will be used in `calculator` later.
+
+#### Parameters:
+* `parameters` *(varadic, any[])* - parameters that will be passed to the `calculator`. Calculator will be called with this set only once unless dependencies are changed. Trailing `undefined` values are dropped.
+
+#### Returns:
+Type: `computedForArgs`.
+The computed value object for the given set of parameters.
+
+### `computedValue.withNoArgs()`
+Returns the computed value object for empty set of parameters.
+
+#### Returns:
+Type: `computedForArgs`.
+The computed value object for empty set of parameters.
 
 ### `itDepends.promiseValue(promise, initialValue)`
 
@@ -152,14 +171,16 @@ Creates promise value wrapper object.
 * `initialValue` *(optional, any, undefined by default)* - the value to be stored in the promise value when created.
 
 #### Returns:
-the `promise` value object filled with the `initialValue` or `undefined` if none specified.
+Type: `promiseValue`.
+The promise value object filled with the `initialValue` or `undefined` if none specified.
 Depending on the concrete Promise implementation can be filled with the value of a Promise if it was resolved already.
 
 ### `promiseValue()`
 Reads the current value of promise value wrapper object.
 
 #### Returns:
-the current value of promise value wrapper object: `initialValue` of an object or the value that was used to resolve the Promise.
+Type: `any`.
+The current value of promise value wrapper object: `initialValue` of an object or the value that was used to resolve the Promise.
 
 ### `itDepends.onChange(callback)`
 Creates the subscription on a change to any observable value.
@@ -168,7 +189,8 @@ Creates the subscription on a change to any observable value.
 * `callback` *(mandatory, function (changed: observableValue, from: any, to: any) -> void )* - the function that will be called immediately when a change is made to any observable value. The callback receives the changed observableValue, old and new value of observable object.
 
 #### Returns:
-the `subscription` object that can be used to control the subscription.
+Type: `subscription`.
+The subscription object that can be used to control the subscription.
 
 ### `observableValue.onChange(callback)`
 Creates the subscription on a change to this observable value.
@@ -177,19 +199,40 @@ Creates the subscription on a change to this observable value.
 * `callback` *(mandatory, function (changed: observableValue, from: any, to: any) -> void )* - the function that will be called immediately when a change is made to this observable value. The callback receives the changed observableValue, old and new value of observable object.
 
 #### Returns:
-the `subscription` object that can be used to control the subscription.
+Type: `subscription`.
+The subscription object that can be used to control the subscription.
+
+### `computedValue.onChange(callback)`
+Creates the subscription on a change to this computed value with no arguments.
+
+#### Parameters:
+* `callback` *(mandatory, function (changed: computedValueForArgs, from: any, to: any, args: any[]) -> void )* - the function that will be called immediately when a change is made to one of dependencies that leads to a change of computed value. The callback receives the changed computedValue, old and new value of computed object and an empty set of arguments.
+
+#### Returns:
+Type: `subscription`.
+The subscription object that can be used to control the subscription.
+
+### `computedValueForArgs.onChange(callback)`
+Creates the subscription on a change to this computed value with the given set of arguments.
+
+#### Parameters:
+* `callback` *(mandatory, function (changed: computedValueForArgs, from: any, to: any, args: any[]) -> void )* - the function that will be called immediately when a change is made to one of dependencies that leads to a change of computed value. The callback receives the changed computedValue, old and new value of computed object and the given set of arguments.
+
+#### Returns:
+Type: `subscription`.
+The subscription object that can be used to control the subscription.
 
 ### `subscription.disable()`
 Disables subscription, so change notifications will stop coming any more, unless it is enabled again with `enable` method.
 
 #### Returns:
-*void*
+Type: `void`.
 
 ### `subscription.enable()`
 Enables subscription if it was disabled previously, so change notifications will start coming again.
 
 #### Returns:
-*void*
+Type: `void`.
 
 ## Example code ([Try it in Tonic](https://tonicdev.com/gerichhome/it-depends))
 ```javascript
