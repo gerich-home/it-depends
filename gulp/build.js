@@ -11,11 +11,11 @@ var addLicense = function() {
 	return header(fs.readFileSync('./license.txt', 'utf8'), pkg);
 };
 
-gulp.task('build', function() {
-    var outputDir = './out/build';
+gulp.task('build', ['build-ts'], function() {
+    var outputDir = './out/dist';
     var libraryName = 'it-depends';
 	var b = browserify({
-		entries: './src/' + libraryName + '.js',
+		entries: './out/build/' + libraryName + '.js',
 		standalone: 'itDepends'
 	});
 	

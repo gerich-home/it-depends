@@ -1,12 +1,22 @@
 'use strict';
 
-var computed = require('./computed');
+import computed, * as computedTypes from './computed'
 
-module.exports = function(calculator) {
-	var cache = {};
+export interface IParametricComputedValue<TWithNoArgs> extends computedTypes.IComputedValue<TWithNoArgs> {
+	onChange(handler: computedTypes.IComputedValueChangeHandler<TWithNoArgs>): computedTypes.ISubscription;
+	withNoArgs(): computedTypes.IComputedValue<TWithNoArgs>;
+	withArgs<TWithArgs>(...args: any[]): computedTypes.IComputedValue<TWithArgs>;
+}
+
+export default function<TWithNoArgs>(calculator: (...params: any[]) => TWithNoArgs): IParametricComputedValue<TWithNoArgs> {
+	interface IComputedHash {
+		[id: string]: computedTypes.IComputedValue<any>
+	}
+	
+	var cache: IComputedHash = {};
 	var allArguments = [];
 	
-	var self = function() {
+	var self = <IParametricComputedValue<TWithNoArgs>>function() {
 		var computedWithArgs = self.withArgs.apply(null, arguments);
 		return computedWithArgs();
 	};
@@ -50,4 +60,4 @@ module.exports = function(calculator) {
 	};
 	
 	return self;
-};
+}
