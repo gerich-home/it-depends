@@ -2,13 +2,24 @@
 
 import computed, * as computedTypes from './computed'
 
-export interface IParametricComputedValue<TWithNoArgs> extends computedTypes.IComputedValue<TWithNoArgs> {
-	onChange(handler: computedTypes.IComputedValueChangeHandler<TWithNoArgs>): computedTypes.ISubscription;
-	withNoArgs(): computedTypes.IComputedValue<TWithNoArgs>;
-	withArgs<TWithArgs>(...args: any[]): computedTypes.IComputedValue<TWithArgs>;
+export type IWriteCallback<T> = computedTypes.IWriteCallback<T>
+
+export interface ICalculator<T> {
+	(...params: any[]): T;
 }
 
-export default function<TWithNoArgs>(calculator: (...params: any[]) => TWithNoArgs): IParametricComputedValue<TWithNoArgs> {
+export interface IParametricComputedValue<T> extends computedTypes.IComputedValue<T> {
+	onChange(handler: computedTypes.IComputedValueChangeHandler<T>): computedTypes.ISubscription;
+	withNoArgs(): computedTypes.IComputedValue<T>;
+	withArgs(...args: any[]): computedTypes.IComputedValue<T>;
+}
+
+export interface IParametricWritableComputedValue<T> extends IParametricComputedValue<T>, computedTypes.IWritableComputedValue<T> {
+}
+
+export function parametricComputed<T>(calculator: ICalculator<T>): IParametricComputedValue<T>;
+export function parametricComputed<T>(calculator: ICalculator<T>, writeCallback: IWriteCallback<T>): IParametricWritableComputedValue<T>;
+export default function parametricComputed<T>(calculator: ICalculator<T>, writeCallback?: IWriteCallback<T>): IParametricComputedValue<T> | IParametricWritableComputedValue<T> {
 	interface IComputedHash {
 		[id: string]: computedTypes.IComputedValue<any>
 	}
@@ -16,7 +27,7 @@ export default function<TWithNoArgs>(calculator: (...params: any[]) => TWithNoAr
 	var cache: IComputedHash = {};
 	var allArguments = [];
 	
-	var self = <IParametricComputedValue<TWithNoArgs>>function() {
+	var self = <IParametricComputedValue<T>>function() {
 		var computedWithArgs = self.withArgs.apply(null, arguments);
 		return computedWithArgs();
 	};
@@ -56,8 +67,13 @@ export default function<TWithNoArgs>(calculator: (...params: any[]) => TWithNoAr
 		}
 		
 		var args = Array.prototype.slice.call(arguments, 0, arguments.length - argsToDrop);
-		return cache[key] || (cache[key] = computed(calculator, args));
+		return cache[key] || (cache[key] = computed(calculator, args, writeCallback));
 	};
+	
+	if(writeCallback !== undefined) {
+		(<IParametricWritableComputedValue<T>>self).write = (newValue) => self.withNoArgs().write(newValue);
+		return <IParametricWritableComputedValue<T>>self;
+	}
 	
 	return self;
 }
