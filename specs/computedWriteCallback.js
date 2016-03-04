@@ -36,36 +36,72 @@ describe('computed', function () {
 			expect(computedValue).to.include.keys('write');
 		});
 		
-		it('should call write callback on write', function () {
-			computedValue.write(3);
+		context('with no arguments', function(){
+			it('should call write callback on write', function () {
+				computedValue.write(3);
+				
+				expect(observableValue()).to.equal(2);
+				expect(calls.readCount).to.equal(0);
+				expect(calls.writeCount).to.equal(1);
+				expect(calls.args.length).to.equal(0);
+				expect(calls.changed).to.equal(computedValue.withNoArgs());
+			});
 			
-			expect(observableValue()).to.equal(2);
-			expect(calls.readCount).to.equal(0);
-			expect(calls.writeCount).to.equal(1);
-			expect(calls.args.length).to.equal(0);
-			expect(calls.args.changed).to.equal(computed.withNoArgs());
+			it('should recalculate when requested after write', function () {
+				computedValue.write(3);
+				
+				var actualValue = computedValue();
+				
+				expect(actualValue).to.equal(3);
+				expect(calls.readCount).to.equal(1);
+				expect(calls.writeCount).to.equal(1);
+				expect(calls.args.length).to.equal(0);
+				expect(calls.changed).to.equal(computedValue.withNoArgs());
+			});
+			
+			it('should not protect from writing the same value twice', function () {
+				computedValue.write(2);
+				
+				expect(observableValue()).to.equal(1);
+				expect(calls.readCount).to.equal(0);
+				expect(calls.writeCount).to.equal(1);
+				expect(calls.args.length).to.equal(0);
+				expect(calls.changed).to.equal(computedValue.withNoArgs());
+			});
 		});
 		
-		it('should recalculate when requested after write', function () {
-			computedValue.write(3);
+		context('with argument', function(){
+			it('should call write callback on write', function () {
+				computedValue.withArgs(10).write(3);
+				
+				expect(observableValue()).to.equal(2);
+				expect(calls.readCount).to.equal(0);
+				expect(calls.writeCount).to.equal(1);
+				expect(calls.args).to.eql([10]);
+				expect(calls.changed).to.equal(computedValue.withArgs(10));
+			});
 			
-			var actualValue = computedValue();
+			it('should recalculate when requested after write', function () {
+				computedValue.withArgs(10).write(3);
+				
+				var actualValue = computedValue(10);
+				
+				expect(actualValue).to.equal(3);
+				expect(calls.readCount).to.equal(1);
+				expect(calls.writeCount).to.equal(1);
+				expect(calls.args).to.eql([10]);
+				expect(calls.changed).to.equal(computedValue.withArgs(10));
+			});
 			
-			expect(actualValue).to.equal(3);
-			expect(calls.readCount).to.equal(1);
-			expect(calls.writeCount).to.equal(1);
-			expect(calls.args.length).to.equal(0);
-			expect(calls.args.changed).to.equal(computed.withNoArgs());
-		});
-		
-		it('should not protect from writing the same value twice', function () {
-			computedValue.write(2);
-			
-			expect(observableValue()).to.equal(1);
-			expect(calls.readCount).to.equal(0);
-			expect(calls.writeCount).to.equal(1);
-			expect(calls.args.length).to.equal(0);
-			expect(calls.args.changed).to.equal(computed.withNoArgs());
+			it('should not protect from writing the same value twice', function () {
+				computedValue.withArgs(10).write(2);
+				
+				expect(observableValue()).to.equal(1);
+				expect(calls.readCount).to.equal(0);
+				expect(calls.writeCount).to.equal(1);
+				expect(calls.args).to.eql([10]);
+				expect(calls.changed).to.equal(computedValue.withArgs(10));
+			});
 		});
 	});
 });
