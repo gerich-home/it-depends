@@ -13,7 +13,13 @@ export interface IComputedValue<T> extends changeNotification.IHasValue<T> {
 	onChange(handler: IComputedValueChangeHandler<T>): ISubscription;
 }
 
-export default function computed<T>(calculator: (...params: any[]) => T, args: any[]): IComputedValue<T> {
+export interface IWritableComputedValue<T> extends IComputedValue<T> {
+	write(newValue: T): void;
+}
+
+export function computed<T>(calculator: (...params: any[]) => T, args: any[]): IComputedValue<T>;
+export function computed<T>(calculator: (...params: any[]) => T, args: any[], writeCallback: (newValue: T, args: any[]) => void): IWritableComputedValue<T>;
+export default function computed<T>(calculator: (...params: any[]) => T, args: any[], writeCallback?: (newValue: T, args: any[]) => void): IComputedValue<T> | IWritableComputedValue<T> {
 	var currentValue: T;
 
 	interface IDependency {
@@ -88,6 +94,14 @@ export default function computed<T>(calculator: (...params: any[]) => T, args: a
 			}
 		});
 	};
+	
+	if(writeCallback !== undefined) {
+		(<IWritableComputedValue<T>>self).write = (newValue) => {
+			writeCallback(newValue, args);
+		};
+		
+		return <IWritableComputedValue<T>>self;
+	}
 
 	return self;
 }

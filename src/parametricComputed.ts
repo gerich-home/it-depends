@@ -8,7 +8,12 @@ export interface IParametricComputedValue<TWithNoArgs> extends computedTypes.ICo
 	withArgs<TWithArgs>(...args: any[]): computedTypes.IComputedValue<TWithArgs>;
 }
 
-export default function<TWithNoArgs>(calculator: (...params: any[]) => TWithNoArgs): IParametricComputedValue<TWithNoArgs> {
+export interface IParametricWritableComputedValue<TWithNoArgs> extends IParametricComputedValue<TWithNoArgs>, computedTypes.IWritableComputedValue<TWithNoArgs> {
+}
+
+export function parametricComputed<TWithNoArgs>(calculator: (...params: any[]) => TWithNoArgs): IParametricComputedValue<TWithNoArgs>;
+export function parametricComputed<TWithNoArgs>(calculator: (...params: any[]) => TWithNoArgs, writeCallback: (newValue: TWithNoArgs, args: any[]) => void): IParametricWritableComputedValue<TWithNoArgs>;
+export default function parametricComputed<TWithNoArgs>(calculator: (...params: any[]) => TWithNoArgs, writeCallback?: (newValue: TWithNoArgs, args: any[]) => void): IParametricComputedValue<TWithNoArgs> | IParametricWritableComputedValue<TWithNoArgs> {
 	interface IComputedHash {
 		[id: string]: computedTypes.IComputedValue<any>
 	}
@@ -56,8 +61,13 @@ export default function<TWithNoArgs>(calculator: (...params: any[]) => TWithNoAr
 		}
 		
 		var args = Array.prototype.slice.call(arguments, 0, arguments.length - argsToDrop);
-		return cache[key] || (cache[key] = computed(calculator, args));
+		return cache[key] || (cache[key] = computed(calculator, args, writeCallback));
 	};
+	
+	if(writeCallback !== undefined) {
+		(<IParametricWritableComputedValue<TWithNoArgs>>self).write = (newValue) => self.withNoArgs().write(newValue);
+		return <IParametricWritableComputedValue<TWithNoArgs>>self;
+	}
 	
 	return self;
 }
