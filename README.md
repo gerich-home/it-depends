@@ -97,6 +97,9 @@ var firstName = itDepends.value('James');
 
 ## API
 
+### `itDepends`
+The single entry point exported by a library. Defined on the global scope when script is included via `<script>` tag.
+
 ### `itDepends.value(initialValue)`
 
 Creates observable value object.
@@ -124,11 +127,22 @@ Updates the current value of observable value object.
 #### Returns:
 Type: `void`.
 
-### `itDepends.computed(calculator)`
+### `observableValue.onChange(callback)`
+Creates the subscription on a change to this observable value.
+
+#### Parameters:
+* `callback` *(mandatory, function (changed: observableValue, from: any, to: any) -> void )* - the function that will be called immediately when a change is made to this observable value. The callback receives the changed observableValue, old and new value of observable object.
+
+#### Returns:
+Type: `subscription`.
+The subscription object that can be used to control the subscription.
+
+### `itDepends.computed(calculator, writeCallback)`
 Creates computed value object.
 
 #### Parameters:
 * `calculator` *(mandatory, function (...parameters: any[]) -> any)* - the function that will be called later to (re)calculate the value of computed. Gets called when you request the value for the first time, or when you request the value when some of dependencies (values/computeds) was changed. Should return(calculate) the current value of the computed value object. **Must not** have side-effects. Calculator function can take parameters. In this case the resulting computed behaves as a set of elementary computeds bound to each distinct set of arguments. These individual computeds can be accessed with `withArgs` and `withNoArgs` methods.
+* `writeCallback` *(optional, function (newValue: any, parameters: any[], self: `computedForArgs`) -> void)* - the function that will be called when `write` method is called. New value is passed into a method plus parameters information is passed as an array along with the computed value being modified.
 
 #### Returns:
 Type: `computedValue`.
@@ -144,6 +158,25 @@ During the call dependencies (values/computeds) used in the calculator will be r
 #### Returns:
 Type: `any`.
 The current value of computed value object for the given parameters.
+
+### `computedValue.write(newValue)`
+Calls write callback for the computed passing empty arguments set.
+
+#### Parameters:
+* `newValue` *(mandatory, any value)* - the new value to write to computed object.
+
+#### Returns:
+Type: `void`.
+
+### `computedValue.onChange(callback)`
+Creates the subscription on a change to this computed value with no arguments.
+
+#### Parameters:
+* `callback` *(mandatory, function (changed: computedValueForArgs, from: any, to: any, args: any[]) -> void )* - the function that will be called immediately when a change is made to one of dependencies that leads to a change of computed value. The callback receives the changed computedValue, old and new value of computed object and an empty set of arguments.
+
+#### Returns:
+Type: `subscription`.
+The subscription object that can be used to control the subscription.
 
 ### `computedValue.withArgs(...parameters)`
 Returns the computed value object for the fixed set of parameters. `parameters` denote the set of arguments that will be used in `calculator` later.
@@ -162,6 +195,25 @@ Returns the computed value object for empty set of parameters.
 Type: `computedForArgs`.
 The computed value object for empty set of parameters.
 
+### `computedForArgs.write(newValue)`
+Calls write callback for the computed passing selected arguments set.
+
+#### Parameters:
+* `newValue` *(mandatory, any value)* - the new value to write to computed object.
+
+#### Returns:
+Type: `void`.
+
+### `computedForArgs.onChange(callback)`
+Creates the subscription on a change to this computed value with the given set of arguments.
+
+#### Parameters:
+* `callback` *(mandatory, function (changed: computedValueForArgs, from: any, to: any, args: any[]) -> void )* - the function that will be called immediately when a change is made to one of dependencies that leads to a change of computed value. The callback receives the changed computedValue, old and new value of computed object and the given set of arguments.
+
+#### Returns:
+Type: `subscription`.
+The subscription object that can be used to control the subscription.
+
 ### `itDepends.promiseValue(promise, initialValue)`
 
 Creates promise value wrapper object.
@@ -171,7 +223,7 @@ Creates promise value wrapper object.
 * `initialValue` *(optional, any, undefined by default)* - the value to be stored in the promise value when created.
 
 #### Returns:
-Type: `promiseValue`.
+Type: `promiseValue` (in fact the same as `computedForArgs`).
 The promise value object filled with the `initialValue` or `undefined` if none specified.
 Depending on the concrete Promise implementation can be filled with the value of a Promise if it was resolved already.
 
@@ -187,36 +239,6 @@ Creates the subscription on a change to any observable value.
 
 #### Parameters:
 * `callback` *(mandatory, function (changed: observableValue, from: any, to: any) -> void )* - the function that will be called immediately when a change is made to any observable value. The callback receives the changed observableValue, old and new value of observable object.
-
-#### Returns:
-Type: `subscription`.
-The subscription object that can be used to control the subscription.
-
-### `observableValue.onChange(callback)`
-Creates the subscription on a change to this observable value.
-
-#### Parameters:
-* `callback` *(mandatory, function (changed: observableValue, from: any, to: any) -> void )* - the function that will be called immediately when a change is made to this observable value. The callback receives the changed observableValue, old and new value of observable object.
-
-#### Returns:
-Type: `subscription`.
-The subscription object that can be used to control the subscription.
-
-### `computedValue.onChange(callback)`
-Creates the subscription on a change to this computed value with no arguments.
-
-#### Parameters:
-* `callback` *(mandatory, function (changed: computedValueForArgs, from: any, to: any, args: any[]) -> void )* - the function that will be called immediately when a change is made to one of dependencies that leads to a change of computed value. The callback receives the changed computedValue, old and new value of computed object and an empty set of arguments.
-
-#### Returns:
-Type: `subscription`.
-The subscription object that can be used to control the subscription.
-
-### `computedValueForArgs.onChange(callback)`
-Creates the subscription on a change to this computed value with the given set of arguments.
-
-#### Parameters:
-* `callback` *(mandatory, function (changed: computedValueForArgs, from: any, to: any, args: any[]) -> void )* - the function that will be called immediately when a change is made to one of dependencies that leads to a change of computed value. The callback receives the changed computedValue, old and new value of computed object and the given set of arguments.
 
 #### Returns:
 Type: `subscription`.
