@@ -81,4 +81,87 @@ describe('usage of the library in the real world scenarios', function () {
 			});
 		});
 	});
+	
+	context('depending on the same value multiple times', function () {
+		var a;
+		var b;
+		var c;
+		var calls;
+		
+		beforeEach(function() {
+			var counter = { count: 0 };
+			calls = counter;
+			
+			a = itDepends.value(4);
+			b = itDepends.value(5);
+			
+			c = itDepends.computed(function() {
+				++counter.count;
+				if(b() - a() === 1) {
+					return a();
+				}
+				else {
+					return b();
+				}
+			});
+		});
+			
+		it('should not recalculate immediately', function () {
+			expect(calls.count).to.equal(0);
+		});
+			
+		it('should recalculate when requested', function () {
+			var actualValue = c();
+			
+			expect(actualValue).to.equal(4);
+			expect(calls.count).to.equal(1);
+		});
+		
+		context('after change is made', function () {		
+			beforeEach(function() {
+				a.write(3);
+			});
+			
+			it('should not recalculate immediately', function () {
+				expect(calls.count).to.equal(0);
+			});
+			
+			it('should recalculate once when requested', function () {
+				var actualValue = c();
+				
+				expect(actualValue).to.equal(5);
+				expect(calls.count).to.equal(1);
+			});
+			
+			it('should not recalculate when requested second time', function () {
+				c();
+				var actualValue = c();
+				
+				expect(actualValue).to.equal(5);
+				expect(calls.count).to.equal(1);
+			});
+		});
+		
+		context('after was requested and a change is made', function () {		
+			beforeEach(function() {
+				c();
+				a.write(3);
+			});
+			
+			it('should recalculate once when requested', function () {
+				var actualValue = c();
+				
+				expect(actualValue).to.equal(5);
+				expect(calls.count).to.equal(2);
+			});
+			
+			it('should not recalculate when requested second time', function () {
+				c();
+				var actualValue = c();
+				
+				expect(actualValue).to.equal(5);
+				expect(calls.count).to.equal(2);
+			});
+		});
+	});
 });
