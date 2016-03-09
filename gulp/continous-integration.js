@@ -5,7 +5,7 @@ function isPullRequest() {
 }
 
 if(isPullRequest()) {
-	gulp.task('continous-integration', ['full', 'performance-tests']);
+	gulp.task('continous-integration', ['full']);
 } else {
-	gulp.task('continous-integration', ['full', 'performance-tests', 'coveralls']);
+	gulp.task('continous-integration', ['full', 'coveralls']);
 }
