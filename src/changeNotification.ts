@@ -13,11 +13,7 @@ export interface IChangeHandler<T> {
 	(changed: IHasValue<T>, from: T, to: T): void;
 }
 
-interface IHandlersHash {
-	[id: number]: IChangeHandler<any>
-}
-
-var handlers: IHandlersHash = {};
+var handlers: IChangeHandler<any>[] = [];
 var nextHandlerId = 0;
 
 export function subscribe<T>(handler: IChangeHandler<T>): ISubscription {
@@ -25,10 +21,15 @@ export function subscribe<T>(handler: IChangeHandler<T>): ISubscription {
 	
 	var subscription = {
 		enable: function() {
-			handlers[handlerId] = handler;
+			if(handlers.indexOf(handler) === -1) {
+				handlers.push(handler);
+			}
 		},
 		disable: function() {
-			delete handlers[handlerId];
+			var handlerIndex = handlers.indexOf(handler);
+			if(handlerIndex !== -1) {
+				handlers.splice(handlerIndex, 1);
+			}
 		}
 	};
 	
@@ -38,10 +39,7 @@ export function subscribe<T>(handler: IChangeHandler<T>): ISubscription {
 }
 
 export function notify<T>(value: IHasValue<T>, from: T, to: T) {
-	for (var handlerId in handlers) {
-		if (!handlers.hasOwnProperty(handlerId))
-			continue;
-		
-		handlers[handlerId](value, from, to);
+	for (var i = 0; i < handlers.length; i++) {
+		handlers[i](value, from, to);
 	}
 }
