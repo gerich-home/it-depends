@@ -14,11 +14,8 @@ export interface IChangeHandler<T> {
 }
 
 var handlers: IChangeHandler<any>[] = [];
-var nextHandlerId = 0;
 
 export function subscribe<T>(handler: IChangeHandler<T>): ISubscription {
-	var handlerId = ++nextHandlerId;
-	
 	var subscription = {
 		enable: function() {
 			if(handlers.indexOf(handler) === -1) {

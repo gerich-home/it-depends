@@ -23,6 +23,8 @@ export default function<T>(initialValue: T): IValue<T> {
 		return currentValue;
 	};
 
+	var handlers: IValueChangeHandler<T>[] = [];
+	
 	self.write = function(newValue) {
 		if (currentValue === newValue) return;
 		
@@ -30,15 +32,31 @@ export default function<T>(initialValue: T): IValue<T> {
 		currentValue = newValue;
 		tracking.lastWriteVersion++;
 		
+		for (var i = 0; i < handlers.length; i++) {
+			handlers[i](self, oldValue, newValue);
+		}
+		
 		changeNotification.notify(self, oldValue, newValue);
 	};
 	
 	self.onChange = function(handler) {
-		return changeNotification.subscribe<T>(function(changed, from, to) {
-			if(changed === self) {
-				handler(self, from, to);
+		var subscription = {
+			enable: function() {
+				if(handlers.indexOf(handler) === -1) {
+					handlers.push(handler);
+				}
+			},
+			disable: function() {
+				var handlerIndex = handlers.indexOf(handler);
+				if(handlerIndex !== -1) {
+					handlers.splice(handlerIndex, 1);
+				}
 			}
-		});
+		};
+		
+		subscription.enable();
+		
+		return subscription;
 	};
 	
 	return self;
