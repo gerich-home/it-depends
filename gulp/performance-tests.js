@@ -3,6 +3,7 @@ var fail = require('gulp-fail');
 var gulpIf = require('gulp-if');
 var benchmark = require('gulp-benchmark');
 var _ = require('lodash');
+var isAppveyor = require('./util/is-appveyor.js');
 
 var timesItDependsMustBeFaster = 1.05;
 var slowTestSuites;
@@ -41,6 +42,10 @@ gulp.task('performance-tests', ['all-tests-with-no-performance'], function () {
 		}))
 		.pipe(gulp.dest('./out/reports'))
 		.pipe(gulpIf(function(file) {
+			if(isAppveyor()) {
+				return false;
+			}
+			
 			slowTestSuites = getSlowTestSuites(file);
 			
 			return slowTestSuites.length > 0;

@@ -1,8 +1,5 @@
 var gulp = require('gulp');
-
-function isPullRequest() {
-    return process.env.APPVEYOR_PULL_REQUEST_NUMBER !== undefined;
-}
+var isPullRequest = require('./util/is-pull-request.js');
 
 if(isPullRequest()) {
 	gulp.task('continous-integration', ['full']);

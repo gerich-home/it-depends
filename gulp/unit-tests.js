@@ -1,9 +1,10 @@
 var gulp = require('gulp');
 var mocha = require('gulp-mocha');
 var cover = require('gulp-coverage');
+var isAppveyor = require('./util/is-appveyor.js');
 
 function mochaReporter() {
-    return process.env.APPVEYOR === 'True'
+    return isAppveyor()
         ? 'mocha-appveyor-reporter'
         : 'spec';
 }
