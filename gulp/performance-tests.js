@@ -4,7 +4,7 @@ var gulpIf = require('gulp-if');
 var benchmark = require('gulp-benchmark');
 var _ = require('lodash');
 
-var timesItDependsMustBeFaster = 1.1;
+var timesItDependsMustBeFaster = 1.05;
 var slowTestSuites;
 
 function getSlowTestSuites(file) {
@@ -18,13 +18,13 @@ function getSlowTestSuites(file) {
 			
 			var itDependsHz = tests.itDepends.hz;
 			
-			var testsThatAreSlower = _(testSuite.results)
+			var testsThatAreSlower = _(tests)
 				.omit('itDepends')
 				.filter(function(test) {
 					return itDependsHz / test.hz < timesItDependsMustBeFaster;
 				})
 				.value();
-				
+			
 			return testsThatAreSlower.length > 0;
 		})
 		.value();
@@ -39,14 +39,14 @@ gulp.task('performance-tests', ['all-tests-with-no-performance'], function () {
 				benchmark.reporters.json()
 			]
 		}))
-		.pipe(gulp.dest('./out/performance'))
+		.pipe(gulp.dest('./out/reports'))
 		.pipe(gulpIf(function(file) {
 			slowTestSuites = getSlowTestSuites(file);
 			
 			return slowTestSuites.length > 0;
 		},
 		fail(function() {
-			return "KnockoutJS is faster than it-depends on the following test suites: " +
-				_(slowTestSuites).map('name').value().join(', ');
+			return 'it-depends is too slow (threshold is ' + timesItDependsMustBeFaster + ') comparing other tests in the following test suites: [\n' +
+				_(slowTestSuites).map('name').value().join(',\n') + '\n]';
 		}, true)));
 });
