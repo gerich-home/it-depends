@@ -17,13 +17,24 @@ export interface IValue<T> extends changeNotification.IHasValue<T> {
 export default function<T>(initialValue: T): IValue<T> {
 	var currentValue = initialValue;
 	var id = tracking.takeNextObservableId();
+	var nextId = 0;
 
+	interface ILinkedListItem {
+		prev: ILinkedListItem,
+		next: ILinkedListItem,
+		handler: IValueChangeHandler<T>,
+	};
+	
 	var self = <IValue<T>>function() {
 		tracking.recordUsage(id, self, currentValue);
 		return currentValue;
 	};
 
-	var handlers: IValueChangeHandler<T>[] = [];
+	var handlersHead: ILinkedListItem = {
+		prev: null,
+		next: null,
+		handler: null
+	};
 	
 	self.write = function(newValue) {
 		if (currentValue === newValue) return;
@@ -32,24 +43,37 @@ export default function<T>(initialValue: T): IValue<T> {
 		currentValue = newValue;
 		tracking.lastWriteVersion++;
 		
-		for (var i = 0; i < handlers.length; i++) {
-			handlers[i](self, oldValue, newValue);
+		var item = handlersHead.next;
+		while(item) {
+			item.handler(self, oldValue, newValue);
+			item = item.next;
 		}
 		
 		changeNotification.notify(self, oldValue, newValue);
 	};
 	
 	self.onChange = function(handler) {
+		var item: ILinkedListItem = null;
+		
 		var subscription = {
 			enable: function() {
-				if(handlers.indexOf(handler) === -1) {
-					handlers.push(handler);
+				if(!item) {
+					item = {
+						prev: handlersHead,
+						next: handlersHead.next,
+						handler: handler
+					};
+					
+					handlersHead.next = item;
 				}
 			},
 			disable: function() {
-				var handlerIndex = handlers.indexOf(handler);
-				if(handlerIndex !== -1) {
-					handlers.splice(handlerIndex, 1);
+				if(item) {
+					item.prev.next = item.next;
+					if(item.next) { item.next.prev = item.prev; }
+					
+					handlersHead = item;
+					item = null;
 				}
 			}
 		};
