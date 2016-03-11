@@ -1,9 +1,9 @@
 'use strict';
 
 import * as tracking from './tracking';
-import * as changeNotification from './changeNotification';
+import changeNotification, * as changeNotificationTypes from './changeNotification';
 
-export type ISubscription = changeNotification.ISubscription;
+export type ISubscription = changeNotificationTypes.ISubscription;
 
 export interface ICalculator<T> {
 	(params: any[]): T;
@@ -17,7 +17,7 @@ export interface IComputedValueChangeHandler<T> {
 	(changed: IComputedValue<T>, from: T, to: T, args: any[]): void;
 }
 
-export interface IComputedValue<T> extends changeNotification.IHasValue<T> {
+export interface IComputedValue<T> extends changeNotificationTypes.IHasValue<T> {
 	onChange(handler: IComputedValueChangeHandler<T>): ISubscription;
 }
 
@@ -31,7 +31,7 @@ export default function computed<T>(calculator: ICalculator<T>, args: any[], wri
 	var currentValue: T;
 
 	interface IDependency {
-		observableValue: changeNotification.IHasValue<any>,
+		observableValue: changeNotificationTypes.IHasValue<any>,
 		capturedValue: any
 	}
 

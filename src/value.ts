@@ -1,29 +1,28 @@
 'use strict';
 
-import * as changeNotification from './changeNotification';
+import changeNotification, * as changeNotificationTypes from './changeNotification';
 import * as tracking from './tracking';
 
-export type ISubscription = changeNotification.ISubscription;
+export type ISubscription = changeNotificationTypes.ISubscription;
 
 export interface IValueChangeHandler<T> {
 	(changed: IValue<T>, from: T, to: T): void;
-};
+}
 
-export interface IValue<T> extends changeNotification.IHasValue<T> {
+export interface IValue<T> extends changeNotificationTypes.IHasValue<T> {
 	write(value: T): void;
 	onChange(handler: IValueChangeHandler<T>): ISubscription;
-};
+}
 
 export default function<T>(initialValue: T): IValue<T> {
 	var currentValue = initialValue;
 	var id = tracking.takeNextObservableId();
-	var nextId = 0;
 
 	interface ILinkedListItem {
 		prev: ILinkedListItem,
 		next: ILinkedListItem,
 		handler: IValueChangeHandler<T>,
-	};
+	}
 	
 	var self = <IValue<T>>function() {
 		tracking.recordUsage(id, self, currentValue);
@@ -84,4 +83,4 @@ export default function<T>(initialValue: T): IValue<T> {
 	};
 	
 	return self;
-};
+}
