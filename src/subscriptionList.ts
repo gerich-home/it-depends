@@ -2,10 +2,11 @@
 
 export interface IHasValue<T> {
 	(): T;
+	onChange(handler: IChangeHandler<T>): ISubscription;
 }
 
 export interface IChangeHandler<T> {
-	(changed: IHasValue<T>, from: T, to: T): void;
+	(changed: IHasValue<T>, from: T, to: T, ...other: any[]): void;
 }
 
 export interface ISubscriptions<T> {
@@ -18,7 +19,12 @@ export interface ISubscription {
 	disable(): void;
 }
 
-export default function<T>(): ISubscriptions<T> {
+export interface IStateListener {
+	activated(): void;
+	deactivated(): void;
+}
+
+export default function<T>(stateListener?: IStateListener): ISubscriptions<T> {
 	interface ILinkedListItem {
 		prev: ILinkedListItem,
 		next: ILinkedListItem,
@@ -38,10 +44,10 @@ export default function<T>(): ISubscriptions<T> {
 	head.next = tail;
 
 	return {
-		notify: function(changed, from, to) {		
+		notify: function(changed, from, to) {
 			var item = head.next;
 			while(item !== tail) {
-				item.handler(changed, from, to);
+				item.handler.apply(null, arguments);
 				item = item.next;
 			}
 		},
@@ -51,6 +57,7 @@ export default function<T>(): ISubscriptions<T> {
 			var subscription = {
 				enable: function() {
 					if(item) { return; }
+					
 					item = {
 						prev: head,
 						next: head.next,
@@ -59,6 +66,10 @@ export default function<T>(): ISubscriptions<T> {
 					
 					head.next.prev = item;
 					head.next = item;
+					
+					if(stateListener && stateListener.activated && item.next === tail) {
+						stateListener.activated();
+					}
 				},
 				disable: function() {
 					if(!item) { return; }
@@ -67,6 +78,10 @@ export default function<T>(): ISubscriptions<T> {
 					item.next.prev = item.prev;
 					
 					item = null;
+					
+					if(stateListener && stateListener.deactivated && head.next === tail) {
+						stateListener.deactivated();
+					}
 				}
 			};
 			

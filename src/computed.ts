@@ -1,9 +1,9 @@
 'use strict';
 
 import * as tracking from './tracking';
-import changeNotification, * as changeNotificationTypes from './changeNotification';
+import subscriptionList, * as subscriptionTypes from './subscriptionList';
 
-export type ISubscription = changeNotificationTypes.ISubscription;
+export type ISubscription = subscriptionTypes.ISubscription;
 
 export interface ICalculator<T> {
 	(params: any[]): T;
@@ -17,7 +17,7 @@ export interface IComputedValueChangeHandler<T> {
 	(changed: IComputedValue<T>, from: T, to: T, args: any[]): void;
 }
 
-export interface IComputedValue<T> extends changeNotificationTypes.IHasValue<T> {
+export interface IComputedValue<T> extends subscriptionTypes.IHasValue<T> {
 	onChange(handler: IComputedValueChangeHandler<T>): ISubscription;
 }
 
@@ -29,27 +29,24 @@ export function computed<T>(calculator: ICalculator<T>, args: any[]): IComputedV
 export function computed<T>(calculator: ICalculator<T>, args: any[], writeCallback: IWriteCallback<T>): IWritableComputedValue<T>;
 export default function computed<T>(calculator: ICalculator<T>, args: any[], writeCallback?: IWriteCallback<T>): IComputedValue<T> | IWritableComputedValue<T> {
 	var currentValue: T;
+	var oldValue: T;
 
 	interface IDependency {
-		observableValue: changeNotificationTypes.IHasValue<any>,
-		capturedValue: any
-	}
-
-	interface IDependencyHash {
-		[id: number]: IDependency
+		observableValue: subscriptionTypes.IHasValue<any>,
+		capturedValue: any,
+		subscription: ISubscription
 	}
 	
-	var dependencies: IDependencyHash;
+	var dependencies: IDependency[];
 	
 	var id = tracking.takeNextObservableId();
-	var lastReadVersion = -1;
+	var lastReadVersion;
+	var subscriptions: subscriptionTypes.ISubscriptions<T>;
+	var subscriptionsActive: boolean;
 
 	var atLeastOneDependencyChanged = function() {
-		for (var dependencyId in dependencies) {
-			if (!dependencies.hasOwnProperty(dependencyId))
-				continue;
-
-			var dependency = dependencies[dependencyId];
+		for (var i = 0; i < dependencies.length; i++) {
+			var dependency = dependencies[i];
 
 			if (dependency.observableValue() !== dependency.capturedValue) {
 				return true;
@@ -59,6 +56,22 @@ export default function computed<T>(calculator: ICalculator<T>, args: any[], wri
 		return false;
 	};
 
+	var unsubscribeDependencies = function() {
+		for (var i = 0; i < dependencies.length; i++) {
+			var dependency = dependencies[i];
+			dependency.subscription.disable();
+			dependency.subscription = null;
+		}
+	};
+
+	var subscribeDependencies = function() {
+		for (var i = 0; i < dependencies.length; i++) {
+			var dependency = dependencies[i];
+
+			dependency.subscription = dependency.observableValue.onChange(self);
+		}
+	};
+
 	var self = <IComputedValue<T>>function() {
 		var needRecalc = function() {
 			return lastReadVersion !== tracking.lastWriteVersion &&
@@ -66,20 +79,35 @@ export default function computed<T>(calculator: ICalculator<T>, args: any[], wri
 		};
 		
 		if (needRecalc()) {
-			dependencies = {};
+			interface IDependencyHash {
+				[id: number]: boolean
+			}
+			
+			var hasDependencies: IDependencyHash = {};
+			if(subscriptionsActive && dependencies) {
+				unsubscribeDependencies();
+			}
+			
+			dependencies = [];
 
 			tracking
 				.trackingWith(function(dependencyId, observableValue, capturedValue) {
-					if (dependencies[dependencyId])
+					if (hasDependencies[dependencyId])
 						return;
 
-					dependencies[dependencyId] = {
+					hasDependencies[dependencyId] = true;
+					dependencies.push({
 						observableValue: observableValue,
-						capturedValue: capturedValue
-					};
+						capturedValue: capturedValue,
+						subscription: subscriptionsActive && observableValue.onChange(self)
+					});
 				})
 				.execute(function() {
+					oldValue = currentValue;
 					currentValue = calculator.apply(null, args);
+					if(subscriptionsActive && oldValue !== currentValue) {
+						subscriptions.notify(self, oldValue, currentValue, args);
+					}
 				});
 			
 			lastReadVersion = tracking.lastWriteVersion;
@@ -91,16 +119,30 @@ export default function computed<T>(calculator: ICalculator<T>, args: any[], wri
 	};
 	
 	self.onChange = function(handler: IComputedValueChangeHandler<T>): ISubscription {
-		var oldValue = self();
+		if(!subscriptions) {
+			subscriptions = subscriptionList<T>({
+				activated: function() {
+					oldValue = self();
+					
+					if(dependencies) {
+						subscribeDependencies();
+					}
+					
+					subscriptionsActive = true;
+				},
+				deactivated: function() {
+					oldValue = undefined;
+					
+					if(dependencies) {
+						unsubscribeDependencies();
+					}
+					
+					subscriptionsActive = false;
+				}
+			});
+		}
 		
-		return changeNotification.subscribe(function() {
-			var newValue = self();
-			
-			if(newValue !== oldValue) {
-				handler(self, oldValue, newValue, args);
-				oldValue = newValue;
-			}
-		});
+		return subscriptions.subscribe(handler);
 	};
 	
 	type writable = IWritableComputedValue<T>;

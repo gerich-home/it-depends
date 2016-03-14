@@ -6,13 +6,8 @@ import subscriptionList, * as subscriptionTypes from './subscriptionList';
 
 export type ISubscription = subscriptionTypes.ISubscription;
 
-export interface IValueChangeHandler<T> {
-	(changed: IValue<T>, from: T, to: T): void;
-}
-
 export interface IValue<T> extends subscriptionTypes.IHasValue<T> {
 	write(value: T): void;
-	onChange(handler: IValueChangeHandler<T>): ISubscription;
 }
 
 export default function<T>(initialValue: T): IValue<T> {
