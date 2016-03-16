@@ -23,7 +23,7 @@ gulp.task('unit-tests-only', ['build'], function() {
 		.pipe(gulp.dest('out/reports'));
 });
 
-if(isPullRequest() || isAppveyor()) {
+if(isPullRequest() || !isAppveyor()) {
 	gulp.task('unit-tests', ['unit-tests-only']);
 } else {
 	gulp.task('unit-tests', ['unit-tests-only', 'coveralls']);
