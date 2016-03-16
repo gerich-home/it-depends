@@ -60,6 +60,9 @@ module.exports = function(updatesCount, subscribersCount) {
 			tearDown: function() {
 				disposeSubscriptions(this.ko);
 				disposeSubscriptions(this.itDepends);
+				
+				this.ko = null;
+				this.itDepends = null;
 			}
 		};
 	};

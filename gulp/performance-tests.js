@@ -10,7 +10,7 @@ function minimalRatio() {
 		// TODO: AppVeyor shows different results for some tests. Need to avoid this check.
 		return 1 / 3;
 	}
-	
+
 	return 1.05;
 }
 
@@ -18,15 +18,15 @@ var slowTestSuites;
 
 function getSlowTestSuites(file) {
 	var report = JSON.parse(file.contents);
-	
+
 	return _(report)
 		.filter(function(testSuite) {
 			var tests = _(testSuite.results)
 				.keyBy('name')
 				.value();
-			
+
 			var itDependsHz = tests.itDepends.hz;
-			
+
 			var testsThatAreSlower = _(tests)
 				.omit('itDepends')
 				.filter(function(test) {
@@ -34,13 +34,13 @@ function getSlowTestSuites(file) {
 					return itDependsHz / test.hz < minimalRatio();
 				})
 				.value();
-			
+
 			return testsThatAreSlower.length > 0;
 		})
 		.value();
 };
 
-gulp.task('performance-tests', ['all-tests-with-no-performance'], function () {
+gulp.task('performance-tests', [/*'all-tests-with-no-performance'*/], function () {
 	return gulp
 		.src('./performance-tests/tests/**/*.js', {read: false})
 		.pipe(benchmark({
@@ -54,9 +54,9 @@ gulp.task('performance-tests', ['all-tests-with-no-performance'], function () {
 			if(isAppveyor()) {
 				return false;
 			}
-			
+
 			slowTestSuites = getSlowTestSuites(file);
-			
+
 			return slowTestSuites.length > 0;
 		},
 		fail(function() {
