@@ -37,7 +37,8 @@ export default function parametricComputed<T>(calculator: ICalculator<T>, writeC
 	};
 	
 	self.withNoArgs = function() {
-		return self.withArgs();
+		return cache[''] ||
+			(cache[''] = computed(calculator, [], writeCallback));
 	};
 	
 	self.withArgs = function() {
@@ -66,8 +67,8 @@ export default function parametricComputed<T>(calculator: ICalculator<T>, writeC
 			}
 		}
 		
-		var args = Array.prototype.slice.call(arguments, 0, arguments.length - argsToDrop);
-		return cache[key] || (cache[key] = computed(calculator, args, writeCallback));
+		return cache[key] ||
+			(cache[key] = computed(calculator, Array.prototype.slice.call(arguments, 0, arguments.length - argsToDrop), writeCallback));
 	};
 	
 	if(writeCallback !== undefined) {

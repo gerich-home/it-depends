@@ -26,8 +26,12 @@ build: off
 artifacts:
   - path: 'out\dist\*.js'
     name: it-depends-library
+  - path: 'out\definitions\*.d.ts'
+    name: typescript-definitions
   - path: 'out\reports\coverage.html'
     name: coverage-html
+  - path: 'out\reports\benchmark-results.json'
+    name: benchmark-results
 
 on_success:
   - ps: >-
