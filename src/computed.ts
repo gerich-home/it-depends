@@ -109,9 +109,9 @@ export default function computed<T>(calculator: ICalculator<T>, args: any[], wri
 						subscriptions.notify(self, oldValue, currentValue, args);
 					}
 				});
-			
-			lastReadVersion = tracking.lastWriteVersion;
 		}
+		
+		lastReadVersion = tracking.lastWriteVersion;
 
 		tracking.recordUsage(id, self, currentValue);
 
@@ -119,28 +119,26 @@ export default function computed<T>(calculator: ICalculator<T>, args: any[], wri
 	};
 	
 	self.onChange = function(handler: IComputedValueChangeHandler<T>): ISubscription {
-		if(!subscriptions) {
-			subscriptions = subscriptionList<T>({
-				activated: function() {
-					oldValue = self();
-					
-					if(dependencies) {
-						subscribeDependencies();
-					}
-					
-					subscriptionsActive = true;
-				},
-				deactivated: function() {
-					oldValue = undefined;
-					
-					if(dependencies) {
-						unsubscribeDependencies();
-					}
-					
-					subscriptionsActive = false;
+		subscriptions = subscriptions || subscriptionList<T>({
+			activated: function() {
+				oldValue = self();
+				
+				if(dependencies) {
+					subscribeDependencies();
 				}
-			});
-		}
+				
+				subscriptionsActive = true;
+			},
+			deactivated: function() {
+				oldValue = undefined;
+				
+				if(dependencies) {
+					unsubscribeDependencies();
+				}
+				
+				subscriptionsActive = false;
+			}
+		});
 		
 		return subscriptions.subscribe(handler);
 	};
