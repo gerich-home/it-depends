@@ -2,67 +2,36 @@ var Benchmark = require('benchmark');
 var itDepends = require('../../out/dist/it-depends.js');
 var ko = require('knockout');
 
-var initialValue = -1;
-
-function _noop() {
-	return function() {};
-};
-
 module.exports = function(readCount) {
-	
-	var testContext;
-	
-	global.createTestContext = function() {
-		function koData() {
-			var observable = ko.observable(initialValue);
-			
-			return {
-				observable: observable
-			};
-		};
-		
-		function itDependsData() {
-			var observable = itDepends.value(initialValue);
-			
-			return {
-				observable: observable
-			};
-		};
-		
-		testContext = {
-			ko: koData(),
-			itDepends: itDependsData(),
-			
-			tearDown: function() {
-				this.ko = null;
-				this.itDepends = null;
-			}
-		};
-	};
-	
-	global.tearDownContext = function() {
-		testContext.tearDown();
+	Benchmark.prototype.args = {
+		readCount: readCount,
+		ko: ko,
+		itDepends: itDepends
 	};
 	
 	Benchmark.prototype.setup = function() {
-		global.createTestContext();
-	};
-	
-	Benchmark.prototype.teardown = function() {
-		global.tearDownContext();
+		var readCount = this.args.readCount;
+		var ko = this.args.ko;
+		var itDepends = this.args.itDepends;
+		
+		var initialValue = -1;
 	};
 	
 	var suite = new Benchmark.Suite('read observable ' + readCount + ' times');
 
 	suite.add('knockout', function() {
+		var observable = ko.observable(initialValue);
+		
 		for (var i = 0; i < readCount; i++) {
-			testContext.ko.observable();
+			var x = observable();
 		}
 	});
 
 	suite.add('itDepends', function() {
+		var observable = itDepends.value(initialValue);
+		
 		for (var i = 0; i < readCount; i++) {
-			testContext.itDepends.observable();
+			var x = observable();
 		}
 	});
 	

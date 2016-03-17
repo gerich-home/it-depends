@@ -19,62 +19,23 @@ module.exports = function(subscribersCount) {
 		function _noop() {
 			return function() {};
 		};
-
-		function koData() {
-			var observable = ko.observable(initialValue);
-
-			return {
-				observable: observable,
-				subscriptions: [],
-				disposeSubscription: function(subscription) {
-					subscription.dispose();
-				}
-			};
-		};
-
-		function itDependsData() {
-			var observable = itDepends.value(initialValue);
-
-			return {
-				observable: observable,
-				subscriptions: [],
-				disposeSubscription: function(subscription) {
-					subscription.disable();
-				}
-			};
-		};
-
-		var testContext = {
-			ko: koData(),
-			itDepends: itDependsData()
-		};
-
-		this.on('complete', function() {
-			function disposeSubscriptions(sourceName) {
-				var source = testContext[sourceName];
-				for(var i = 0; i < source.subscriptions.length; ++i) {
-					source.disposeSubscription(source.subscriptions[i]);
-				}
-
-				source.subscriptions = [];
-			}
-
-			disposeSubscriptions('ko');
-			disposeSubscriptions('itDepends');
-		});
 	};
 
 	var suite = new Benchmark.Suite('subscribe to observable with ' + subscribersCount + ' subscribers');
 
 	suite.add('knockout', function() {
+		var observable = ko.observable(initialValue);
+		
 		for (var i = 0; i < subscribersCount; i++) {
-			testContext.ko.subscriptions.push(testContext.ko.observable.subscribe(_noop()));
+			observable.subscribe(_noop());
 		}
 	});
 
 	suite.add('itDepends', function() {
+		var observable = itDepends.value(initialValue);
+		
 		for (var i = 0; i < subscribersCount; i++) {
-			testContext.itDepends.subscriptions.push(testContext.itDepends.observable.onChange(_noop()));
+			observable.onChange(_noop());
 		}
 	});
 

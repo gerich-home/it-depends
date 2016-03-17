@@ -40,7 +40,7 @@ function getSlowTestSuites(file) {
 		.value();
 };
 
-gulp.task('performance-tests', [/*'all-tests-with-no-performance'*/], function () {
+gulp.task('performance-tests', ['all-tests-with-no-performance'], function () {
 	return gulp
 		.src('./performance-tests/tests/**/*.js', {read: false})
 		.pipe(benchmark({

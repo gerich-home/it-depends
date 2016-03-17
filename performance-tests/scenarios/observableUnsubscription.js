@@ -2,77 +2,48 @@ var Benchmark = require('benchmark');
 var itDepends = require('../../out/dist/it-depends.js');
 var ko = require('knockout');
 
-var initialValue = -1;
-
-function _noop() {
-	return function() {};
-};
-
 module.exports = function(subscribersCount) {
-
-	var testContext;
-
-	global.createTestContext = function() {
-		function koData() {
-			var observable = ko.observable(initialValue);
-
-			return {
-				observable: observable
-			};
-		};
-
-		function itDependsData() {
-			var observable = itDepends.value(initialValue);
-
-			return {
-				observable: observable
-			};
-		};
-
-		testContext = {
-			ko: koData(),
-			itDepends: itDependsData(),
-
-			tearDown: function() {
-				this.ko = null;
-				this.itDepends = null;
-			}
-		};
-	};
-
-	global.tearDownContext = function() {
-		testContext.tearDown();
+	Benchmark.prototype.args = {
+		subscribersCount: subscribersCount,
+		ko: ko,
+		itDepends: itDepends
 	};
 
 	Benchmark.prototype.setup = function() {
-		global.createTestContext();
+		var subscribersCount = this.args.subscribersCount;
+		var ko = this.args.ko;
+		var itDepends = this.args.itDepends;
+
+		var initialValue = -1;
+
+		function _noop() {
+			return function() {};
+		};
 	};
 
-	Benchmark.prototype.teardown = function() {
-		global.tearDownContext();
-	};
-
-	var suite = new Benchmark.Suite('subscribe to observable with ' + subscribersCount + ' subscribers');
+	var suite = new Benchmark.Suite('unsubscribe from observable with ' + subscribersCount + ' subscribers');
 
 	suite.add('knockout', function() {
+		var observable = ko.observable(initialValue);
 		var subscriptions = [];
-
+		
 		for (var i = 0; i < subscribersCount; i++) {
-			subscriptions.push(testContext.ko.observable.subscribe(_noop()));
+			subscriptions.push(observable.subscribe(_noop()));
 		}
-
+		
 		for (var i = 0; i < subscribersCount; i++) {
 			subscriptions[i].dispose();
 		}
 	});
 
 	suite.add('itDepends', function() {
+		var observable = itDepends.value(initialValue);
 		var subscriptions = [];
-
+		
 		for (var i = 0; i < subscribersCount; i++) {
-			subscriptions.push(testContext.itDepends.observable.onChange(_noop()));
+			subscriptions.push(observable.onChange(_noop()));
 		}
-
+		
 		for (var i = 0; i < subscribersCount; i++) {
 			subscriptions[i].disable();
 		}
