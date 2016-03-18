@@ -77,7 +77,7 @@ export default function<T>(stateListener?: IStateListener): ISubscriptions<T> {
 					item.prev.next = item.next;
 					item.next.prev = item.prev;
 					
-					if(stateListener && item.next === tail) {
+					if(stateListener && head.next === tail) {
 						stateListener.deactivated();
 					}
 					

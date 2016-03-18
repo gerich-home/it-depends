@@ -56,7 +56,7 @@ export default function computed<T>(calculator: ICalculator<T>, args: any[], wri
 		return false;
 	};
 
-	var unsubscribeDependencies = function() {
+	var unsubscribeDependencies = function(dependencies) {
 		for (var i = 0; i < dependencies.length; i++) {
 			var dependency = dependencies[i];
 			dependency.subscription.disable();
@@ -73,45 +73,44 @@ export default function computed<T>(calculator: ICalculator<T>, args: any[], wri
 	};
 
 	var self = <IComputedValue<T>>function() {
-		var needRecalc = function() {
-			return lastReadVersion !== tracking.lastWriteVersion &&
-				(!dependencies || atLeastOneDependencyChanged())
-		};
-		
-		if (needRecalc()) {
-			interface IDependencyHash {
-				[id: number]: boolean
-			}
+		if(lastReadVersion !== tracking.lastWriteVersion) {
+			lastReadVersion = tracking.lastWriteVersion;
 			
-			var hasDependencies: IDependencyHash = {};
-			if(subscriptionsActive && dependencies) {
-				unsubscribeDependencies();
-			}
-			
-			dependencies = [];
+			if (!dependencies || atLeastOneDependencyChanged()) {
+				interface IDependencyHash {
+					[id: number]: boolean
+				}
+				
+				var hasDependencies: IDependencyHash = {};
+				
+				var oldDependencies = dependencies;
+				dependencies = [];
 
-			tracking
-				.trackingWith(function(dependencyId, observableValue, capturedValue) {
-					if (hasDependencies[dependencyId])
-						return;
+				tracking
+					.trackingWith(function(dependencyId, observableValue, capturedValue) {
+						if (hasDependencies[dependencyId])
+							return;
 
-					hasDependencies[dependencyId] = true;
-					dependencies.push({
-						observableValue: observableValue,
-						capturedValue: capturedValue,
-						subscription: subscriptionsActive && observableValue.onChange(self)
+						hasDependencies[dependencyId] = true;
+						dependencies.push({
+							observableValue: observableValue,
+							capturedValue: capturedValue,
+							subscription: subscriptionsActive && observableValue.onChange(self)
+						});
+					})
+					.execute(function() {
+						oldValue = currentValue;
+						currentValue = calculator.apply(null, args);
+						if(subscriptionsActive && oldValue !== currentValue) {
+							subscriptions.notify(self, oldValue, currentValue, args);
+						}
 					});
-				})
-				.execute(function() {
-					oldValue = currentValue;
-					currentValue = calculator.apply(null, args);
-					if(subscriptionsActive && oldValue !== currentValue) {
-						subscriptions.notify(self, oldValue, currentValue, args);
-					}
-				});
+				
+				if(subscriptionsActive && oldDependencies) {
+					unsubscribeDependencies(oldDependencies);
+				}
+			}
 		}
-		
-		lastReadVersion = tracking.lastWriteVersion;
 
 		tracking.recordUsage(id, self, currentValue);
 
@@ -133,7 +132,7 @@ export default function computed<T>(calculator: ICalculator<T>, args: any[], wri
 				oldValue = undefined;
 				
 				if(dependencies) {
-					unsubscribeDependencies();
+					unsubscribeDependencies(dependencies);
 				}
 				
 				subscriptionsActive = false;
