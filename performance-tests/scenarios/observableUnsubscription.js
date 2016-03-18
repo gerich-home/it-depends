@@ -31,7 +31,7 @@ module.exports = function(subscribersCount) {
 			subscriptions.push(observable.subscribe(_noop()));
 		}
 		
-		for (var i = 0; i < subscribersCount; i++) {
+		for (var i = subscribersCount - 1; i >= 0; i--) {
 			subscriptions[i].dispose();
 		}
 	});
@@ -44,7 +44,7 @@ module.exports = function(subscribersCount) {
 			subscriptions.push(observable.onChange(_noop()));
 		}
 		
-		for (var i = 0; i < subscribersCount; i++) {
+		for (var i = subscribersCount - 1; i >= 0; i--) {
 			subscriptions[i].disable();
 		}
 	});
