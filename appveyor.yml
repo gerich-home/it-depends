@@ -49,6 +49,13 @@ deploy:
     branch: master
     appveyor_repo_tag: true
 
+notifications:
+  - provider: Webhook
+    url: https://webhooks.gitter.im/e/a59d0dddc1e6e608d168
+    on_build_success: false
+    on_build_failure: true
+    on_build_status_changed: true
+
 cache:
   - C:\Users\appveyor\AppData\Roaming\npm\node_modules -> package.json  # global npm modules
   - C:\Users\appveyor\AppData\Roaming\npm-cache -> package.json         # npm cache
