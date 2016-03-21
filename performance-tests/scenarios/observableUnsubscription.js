@@ -14,30 +14,38 @@ module.exports = function(subscribersCount) {
 		var ko = this.args.ko;
 		var itDepends = this.args.itDepends;
 
-		var calculator = function() {
-			return 0;
-		};
+		var initialValue = -1;
 
 		function _noop() {
 			return function() {};
-		};
+		}
 	};
 
-	var suite = new Benchmark.Suite('subscribe to computed with ' + subscribersCount + ' subscribers');
+	var suite = new Benchmark.Suite('unsubscribe from observable with ' + subscribersCount + ' subscribers');
 
 	suite.add('knockout', function() {
-		var computed = ko.computed(calculator);
-
+		var observable = ko.observable(initialValue);
+		var subscriptions = [];
+		
 		for (var i = 0; i < subscribersCount; i++) {
-			computed.subscribe(_noop());
+			subscriptions.push(observable.subscribe(_noop()));
+		}
+		
+		for (var j = subscribersCount - 1; j >= 0; j--) {
+			subscriptions[j].dispose();
 		}
 	});
 
 	suite.add('itDepends', function() {
-		var computed = itDepends.computed(calculator);
-
+		var observable = itDepends.value(initialValue);
+		var subscriptions = [];
+		
 		for (var i = 0; i < subscribersCount; i++) {
-			computed.onChange(_noop());
+			subscriptions.push(observable.onChange(_noop()));
+		}
+		
+		for (var j = subscribersCount - 1; j >= 0; j--) {
+			subscriptions[j].disable();
 		}
 	});
 

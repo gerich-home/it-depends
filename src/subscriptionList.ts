@@ -6,7 +6,7 @@ export interface IHasValue<T> {
 }
 
 export interface IChangeHandler<T> {
-	(changed: IHasValue<T>, from: T, to: T, ...other: any[]): void;
+	(changed: IHasValue<T>, from: T, to: T, args?: any[]): void;
 }
 
 export interface ISubscriptions<T> {
@@ -44,10 +44,10 @@ export default function<T>(stateListener?: IStateListener): ISubscriptions<T> {
 	head.next = tail;
 
 	return {
-		notify: function(changed, from, to) {
+		notify: function(changed, from, to, args) {
 			var item = head.next;
 			while(item !== tail) {
-				item.handler.apply(null, arguments);
+				item.handler(changed, from, to, args);
 				item = item.next;
 			}
 		},
@@ -67,7 +67,7 @@ export default function<T>(stateListener?: IStateListener): ISubscriptions<T> {
 					head.next.prev = item;
 					head.next = item;
 					
-					if(stateListener && stateListener.activated && item.next === tail) {
+					if(stateListener && item.next === tail) {
 						stateListener.activated();
 					}
 				},
@@ -77,11 +77,11 @@ export default function<T>(stateListener?: IStateListener): ISubscriptions<T> {
 					item.prev.next = item.next;
 					item.next.prev = item.prev;
 					
-					item = null;
-					
-					if(stateListener && stateListener.deactivated && head.next === tail) {
+					if(stateListener && head.next === tail) {
 						stateListener.deactivated();
 					}
+					
+					item = null;
 				}
 			};
 			

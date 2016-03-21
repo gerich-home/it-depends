@@ -35,9 +35,7 @@ export default function<T>(initialValue: T): IValue<T> {
 	};
 	
 	self.onChange = function(handler) {
-		if(!subscriptions) {
-			subscriptions = subscriptionList<T>();
-		}
+		subscriptions = subscriptions || subscriptionList<T>();
 		
 		return subscriptions.subscribe(handler);
 	};
