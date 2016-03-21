@@ -6,6 +6,8 @@
 [![Code Climate](https://codeclimate.com/github/gerich-home/it-depends/badges/gpa.svg)](https://codeclimate.com/github/gerich-home/it-depends)
 
 # it-depends
+
+[![Join the chat at https://gitter.im/gerich-home/it-depends](https://badges.gitter.im/gerich-home/it-depends.svg)](https://gitter.im/gerich-home/it-depends?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 Lightweight dependency tracking / caching library for JavaScript
 
 ## About the library
