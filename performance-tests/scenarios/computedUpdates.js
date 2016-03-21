@@ -27,7 +27,7 @@ module.exports = function(updatesCount, subscribersCount) {
 
 	suite.add('knockout', function() {
 		var observable = ko.observable(initialValue);
-		var computed = ko.computed(function() {
+		var computed = ko.pureComputed(function() {
 			return observable();
 		});
 
@@ -44,7 +44,7 @@ module.exports = function(updatesCount, subscribersCount) {
 		var observable = itDepends.value(initialValue);
 		var computed = itDepends.computed(function() {
 			return observable();
-		});
+		}).withNoArgs();
 
 		for(var i = 0; i < subscribersCount; ++i) {
 			computed.onChange(_noop());
