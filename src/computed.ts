@@ -34,7 +34,8 @@ export default function computed<T>(calculator: ICalculator<T>, args: any[], wri
 	interface IDependency {
 		observableValue: subscriptionTypes.IHasValue<any>,
 		capturedValue: any,
-		subscription: ISubscription
+		dependencyId: number,
+		subscription?: ISubscription
 	}
 	
 	var dependencies: IDependency[];
@@ -73,44 +74,78 @@ export default function computed<T>(calculator: ICalculator<T>, args: any[], wri
 	};
 
 	var self = <IComputedValue<T>>function() {
-		var needRecalc = function() {
-			return lastReadVersion !== tracking.lastWriteVersion &&
-				(!dependencies || atLeastOneDependencyChanged())
-		};
-		
-		if (needRecalc()) {
-			interface IDependencyHash {
-				[id: number]: boolean
-			}
+		if(lastReadVersion !== tracking.lastWriteVersion) {
+			lastReadVersion = tracking.lastWriteVersion;
 			
-			var hasDependencies: IDependencyHash = {};
-			if(subscriptionsActive && dependencies) {
-				unsubscribeDependencies();
-			}
-			
-			dependencies = [];
+			if (!dependencies || atLeastOneDependencyChanged()) {
+				interface IDependencyHash {
+					[id: number]: IDependency
+				}
+				
+				var dependenciesById: IDependencyHash = {};
+				
+				var oldDependencies = dependencies;
+				dependencies = [];
+				
+				tracking
+					.trackingWith(function(dependencyId, observableValue, capturedValue) {
+						if (dependenciesById[dependencyId])
+							return;
+						
+						var dependency = {
+							dependencyId: dependencyId,
+							observableValue: observableValue,
+							capturedValue: capturedValue
+						};
 
-			tracking
-				.trackingWith(function(dependencyId, observableValue, capturedValue) {
-					if (hasDependencies[dependencyId])
-						return;
-
-					hasDependencies[dependencyId] = true;
-					dependencies.push({
-						observableValue: observableValue,
-						capturedValue: capturedValue,
-						subscription: subscriptionsActive && observableValue.onChange(self)
+						dependenciesById[dependencyId] = dependency;
+						dependencies.push(dependency);
+					})
+					.execute(function() {
+						if(subscriptionsActive) {
+							oldValue = currentValue;
+						}
+						
+						currentValue = calculator.apply(null, args);
 					});
-				})
-				.execute(function() {
-					oldValue = currentValue;
-					currentValue = calculator.apply(null, args);
-					if(subscriptionsActive && oldValue !== currentValue) {
+				
+				if(subscriptionsActive) {
+					if(oldDependencies) {
+						for (var i = 0; i < oldDependencies.length; i++) {
+							var oldDependency = oldDependencies[i];
+							var newDependency = dependenciesById[oldDependency.dependencyId];
+
+							if(newDependency) {
+								newDependency.subscription = oldDependency.subscription;
+							}
+						}
+					}
+				
+					for (var i = 0; i < dependencies.length; i++) {
+						var dependency = dependencies[i];
+						dependency.subscription = dependency.subscription || dependency.observableValue.onChange(self);
+					}
+					
+					if(oldDependencies) {
+						for (var i = 0; i < oldDependencies.length; i++) {
+							var oldDependency = oldDependencies[i];
+							var newDependency = dependenciesById[oldDependency.dependencyId];
+
+							if(!newDependency) {
+								oldDependency.subscription.disable();
+							}
+						}
+						
+						oldDependencies = undefined;
+					}
+					
+					dependenciesById = undefined;
+						
+					if(oldValue !== currentValue) {
 						subscriptions.notify(self, oldValue, currentValue, args);
 					}
-				});
-			
-			lastReadVersion = tracking.lastWriteVersion;
+				}
+			}
 		}
 
 		tracking.recordUsage(id, self, currentValue);
@@ -119,28 +154,26 @@ export default function computed<T>(calculator: ICalculator<T>, args: any[], wri
 	};
 	
 	self.onChange = function(handler: IComputedValueChangeHandler<T>): ISubscription {
-		if(!subscriptions) {
-			subscriptions = subscriptionList<T>({
-				activated: function() {
-					oldValue = self();
-					
-					if(dependencies) {
-						subscribeDependencies();
-					}
-					
-					subscriptionsActive = true;
-				},
-				deactivated: function() {
-					oldValue = undefined;
-					
-					if(dependencies) {
-						unsubscribeDependencies();
-					}
-					
-					subscriptionsActive = false;
+		subscriptions = subscriptions || subscriptionList<T>({
+			activated: function() {
+				oldValue = self();
+				
+				if(dependencies) {
+					subscribeDependencies();
 				}
-			});
-		}
+				
+				subscriptionsActive = true;
+			},
+			deactivated: function() {
+				oldValue = undefined;
+				
+				if(dependencies) {
+					unsubscribeDependencies();
+				}
+				
+				subscriptionsActive = false;
+			}
+		});
 		
 		return subscriptions.subscribe(handler);
 	};
