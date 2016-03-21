@@ -34,7 +34,8 @@ export default function computed<T>(calculator: ICalculator<T>, args: any[], wri
 	interface IDependency {
 		observableValue: subscriptionTypes.IHasValue<any>,
 		capturedValue: any,
-		subscription: ISubscription
+		dependencyId: number,
+		subscription?: ISubscription
 	}
 	
 	var dependencies: IDependency[];
@@ -56,7 +57,7 @@ export default function computed<T>(calculator: ICalculator<T>, args: any[], wri
 		return false;
 	};
 
-	var unsubscribeDependencies = function(dependencies) {
+	var unsubscribeDependencies = function() {
 		for (var i = 0; i < dependencies.length; i++) {
 			var dependency = dependencies[i];
 			dependency.subscription.disable();
@@ -78,36 +79,71 @@ export default function computed<T>(calculator: ICalculator<T>, args: any[], wri
 			
 			if (!dependencies || atLeastOneDependencyChanged()) {
 				interface IDependencyHash {
-					[id: number]: boolean
+					[id: number]: IDependency
 				}
 				
-				var hasDependencies: IDependencyHash = {};
+				var dependenciesById: IDependencyHash = {};
 				
 				var oldDependencies = dependencies;
 				dependencies = [];
-
+				
 				tracking
 					.trackingWith(function(dependencyId, observableValue, capturedValue) {
-						if (hasDependencies[dependencyId])
+						if (dependenciesById[dependencyId])
 							return;
-
-						hasDependencies[dependencyId] = true;
-						dependencies.push({
+						
+						var dependency = {
+							dependencyId: dependencyId,
 							observableValue: observableValue,
-							capturedValue: capturedValue,
-							subscription: subscriptionsActive && observableValue.onChange(self)
-						});
+							capturedValue: capturedValue
+						};
+
+						dependenciesById[dependencyId] = dependency;
+						dependencies.push(dependency);
 					})
 					.execute(function() {
-						oldValue = currentValue;
-						currentValue = calculator.apply(null, args);
-						if(subscriptionsActive && oldValue !== currentValue) {
-							subscriptions.notify(self, oldValue, currentValue, args);
+						if(subscriptionsActive) {
+							oldValue = currentValue;
 						}
+						
+						currentValue = calculator.apply(null, args);
 					});
 				
-				if(subscriptionsActive && oldDependencies) {
-					unsubscribeDependencies(oldDependencies);
+				if(subscriptionsActive) {
+					if(oldDependencies) {
+						for (var i = 0; i < oldDependencies.length; i++) {
+							var oldDependency = oldDependencies[i];
+							var newDependency = dependenciesById[oldDependency.dependencyId];
+
+							if(newDependency) {
+								newDependency.subscription = oldDependency.subscription;
+							}
+						}
+					}
+				
+					for (var i = 0; i < dependencies.length; i++) {
+						var dependency = dependencies[i];
+						dependency.subscription = dependency.subscription || dependency.observableValue.onChange(self);
+					}
+					
+					if(oldDependencies) {
+						for (var i = 0; i < oldDependencies.length; i++) {
+							var oldDependency = oldDependencies[i];
+							var newDependency = dependenciesById[oldDependency.dependencyId];
+
+							if(!newDependency) {
+								oldDependency.subscription.disable();
+							}
+						}
+						
+						oldDependencies = undefined;
+					}
+					
+					dependenciesById = undefined;
+						
+					if(oldValue !== currentValue) {
+						subscriptions.notify(self, oldValue, currentValue, args);
+					}
 				}
 			}
 		}
@@ -132,7 +168,7 @@ export default function computed<T>(calculator: ICalculator<T>, args: any[], wri
 				oldValue = undefined;
 				
 				if(dependencies) {
-					unsubscribeDependencies(dependencies);
+					unsubscribeDependencies();
 				}
 				
 				subscriptionsActive = false;
