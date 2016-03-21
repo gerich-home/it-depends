@@ -18,7 +18,7 @@ module.exports = function(subscribersCount) {
 
 		function _noop() {
 			return function() {};
-		};
+		}
 	};
 
 	var suite = new Benchmark.Suite('unsubscribe from observable with ' + subscribersCount + ' subscribers');
@@ -31,8 +31,8 @@ module.exports = function(subscribersCount) {
 			subscriptions.push(observable.subscribe(_noop()));
 		}
 		
-		for (var i = subscribersCount - 1; i >= 0; i--) {
-			subscriptions[i].dispose();
+		for (var j = subscribersCount - 1; j >= 0; j--) {
+			subscriptions[j].dispose();
 		}
 	});
 
@@ -44,8 +44,8 @@ module.exports = function(subscribersCount) {
 			subscriptions.push(observable.onChange(_noop()));
 		}
 		
-		for (var i = subscribersCount - 1; i >= 0; i--) {
-			subscriptions[i].disable();
+		for (var j = subscribersCount - 1; j >= 0; j--) {
+			subscriptions[j].disable();
 		}
 	});
 

@@ -20,7 +20,7 @@ module.exports = function(updatesCount, subscribersCount) {
 
 		function _noop() {
 			return function() {};
-		};
+		}
 	};
 	
 	var suite = new Benchmark.Suite('computed updated ' + updatesCount + ' times with ' + subscribersCount + ' subscribers');
@@ -35,8 +35,8 @@ module.exports = function(updatesCount, subscribersCount) {
 			computed.subscribe(_noop());
 		}
 		
-		for (var i = 0; i < updatesCount; i++) {
-			observable(i);
+		for (var j = 0; j < updatesCount; j++) {
+			observable(j);
 		}
 	});
 
@@ -50,8 +50,8 @@ module.exports = function(updatesCount, subscribersCount) {
 			computed.onChange(_noop());
 		}
 		
-		for (var i = 0; i < updatesCount; i++) {
-			observable.write(i);
+		for (var j = 0; j < updatesCount; j++) {
+			observable.write(j);
 		}
 	});
 
