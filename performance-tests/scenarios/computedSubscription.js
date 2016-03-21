@@ -26,7 +26,7 @@ module.exports = function(subscribersCount) {
 	var suite = new Benchmark.Suite('subscribe to computed with ' + subscribersCount + ' subscribers');
 
 	suite.add('knockout', function() {
-		var computed = ko.computed(calculator);
+		var computed = ko.pureComputed(calculator);
 
 		for (var i = 0; i < subscribersCount; i++) {
 			computed.subscribe(_noop());
@@ -34,7 +34,7 @@ module.exports = function(subscribersCount) {
 	});
 
 	suite.add('itDepends', function() {
-		var computed = itDepends.computed(calculator);
+		var computed = itDepends.computed(calculator).withNoArgs();
 
 		for (var i = 0; i < subscribersCount; i++) {
 			computed.onChange(_noop());
