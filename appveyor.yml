@@ -51,7 +51,7 @@ deploy:
 
 notifications:
   - provider: Webhook
-    url: https://webhooks.gitter.im/e/a59d0dddc1e6e608d168
+    url: https://webhooks.gitter.im/e/3e4f4d24df09d725689d
     on_build_success: true
     on_build_failure: true
     on_build_status_changed: true
