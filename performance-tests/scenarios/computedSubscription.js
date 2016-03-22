@@ -21,24 +21,39 @@ module.exports = function(subscribersCount) {
 		function _noop() {
 			return function() {};
 		};
+		
+		var kocomputed = ko.pureComputed(calculator);
+		var idcomputed = itDepends.computed(calculator).withNoArgs();
 	};
 
-	var suite = new Benchmark.Suite('subscribe to computed with ' + subscribersCount + ' subscribers');
+	var suite = new Benchmark.Suite('subscribe to computed with ' + subscribersCount + ' subscribers and unsubscribe them');
 
 	suite.add('knockout', function() {
-		var computed = ko.pureComputed(calculator);
-
+		var subscriptions = [];
+		
 		for (var i = 0; i < subscribersCount; i++) {
-			computed.subscribe(_noop());
+			subscriptions.push(kocomputed.subscribe(_noop()));
 		}
+		
+		for (var j = 1; j < subscribersCount; j++) {
+			subscriptions[j].dispose();
+		}
+		
+		subscriptions[0].dispose();
 	});
 
 	suite.add('itDepends', function() {
-		var computed = itDepends.computed(calculator).withNoArgs();
-
+		var subscriptions = [];
+		
 		for (var i = 0; i < subscribersCount; i++) {
-			computed.onChange(_noop());
+			subscriptions.push(idcomputed.onChange(_noop()));
 		}
+		
+		for (var j = 1; j < subscribersCount; j++) {
+			subscriptions[j].disable();
+		}
+		
+		subscriptions[0].disable();
 	});
 
 	return suite;

@@ -15,23 +15,22 @@ module.exports = function(readCount) {
 		var itDepends = this.args.itDepends;
 		
 		var initialValue = -1;
+		
+		var koobservable = ko.observable(initialValue);
+		var idobservable = itDepends.value(initialValue);
 	};
 	
 	var suite = new Benchmark.Suite('read observable ' + readCount + ' times');
 
 	suite.add('knockout', function() {
-		var observable = ko.observable(initialValue);
-		
 		for (var i = 0; i < readCount; i++) {
-			var x = observable();
+			var x = koobservable();
 		}
 	});
 
 	suite.add('itDepends', function() {
-		var observable = itDepends.value(initialValue);
-		
 		for (var i = 0; i < readCount; i++) {
-			var x = observable();
+			var x = idobservable();
 		}
 	});
 	

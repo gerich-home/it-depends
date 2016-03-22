@@ -6,12 +6,7 @@ var _ = require('lodash');
 var isAppveyor = require('./util/is-appveyor.js');
 
 function minimalRatio() {
-	if(isAppveyor()) {
-		// TODO: AppVeyor shows different results for some tests. Need to avoid this check.
-		return 1 / 3;
-	}
-
-	return 1.05;
+	return 2 / 3;
 }
 
 var slowTestSuites;
@@ -52,7 +47,7 @@ gulp.task('performance-tests', ['all-tests-with-no-performance'], function () {
 		.pipe(gulp.dest('./out/reports'))
 		.pipe(gulpIf(function(file) {
 			if(isAppveyor()) {
-				return false;
+				return false; // TODO: some AppVeyor results seem to be not representive (90x times faster, 50x times slover). Ignore them for now in CI.
 			}
 
 			slowTestSuites = getSlowTestSuites(file);
