@@ -51,7 +51,7 @@ deploy:
 
 notifications:
   - provider: Webhook
-    url: http://requestb.in/1fqpmp61
+    url: https://webhooks.gitter.im/e/a59d0dddc1e6e608d168
     on_build_success: true
     on_build_failure: true
     on_build_status_changed: true
