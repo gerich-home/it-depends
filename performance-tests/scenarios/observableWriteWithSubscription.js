@@ -27,31 +27,30 @@ module.exports = function(updatesCount, subscribersCount) {
 		function _noop() {
 			return function() {};
 		}
+		
+		var koobservable = ko.observable(initialValue);
+		var idobservable = itDepends.value(initialValue);
+
+		for(var i = 0; i < subscribersCount; ++i) {
+			koobservable.subscribe(_noop());
+		}
+
+		for(var i = 0; i < subscribersCount; ++i) {
+			idobservable.onChange(_noop());
+		}
 	};
 	
 	var suite = new Benchmark.Suite('write observable ' + updatesCount + ' times with ' + subscribersCount + ' subscribers');
 
 	suite.add('knockout', function() {
-		var observable = ko.observable(initialValue);
-
-		for(var i = 0; i < subscribersCount; ++i) {
-			observable.subscribe(_noop());
-		}
-		
 		for (var j = 0; j < updatesCount; j++) {
-			observable(j);
+			koobservable(j);
 		}
 	});
 
 	suite.add('itDepends', function() {
-		var observable = itDepends.value(initialValue);
-
-		for(var i = 0; i < subscribersCount; ++i) {
-			observable.onChange(_noop());
-		}
-		
 		for (var j = 0; j < updatesCount; j++) {
-			observable.write(j);
+			idobservable.write(j);
 		}
 	});
 	

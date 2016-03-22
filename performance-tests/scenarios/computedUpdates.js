@@ -21,37 +21,38 @@ module.exports = function(updatesCount, subscribersCount) {
 		function _noop() {
 			return function() {};
 		}
+		
+		var koobservable = ko.observable(initialValue);
+		var idobservable = itDepends.value(initialValue);
+		
+		var kocomputed = ko.pureComputed(function() {
+			return koobservable();
+		});
+		
+		var idcomputed = itDepends.computed(function() {
+			return idobservable();
+		}).withNoArgs();
+
+		for(var i = 0; i < subscribersCount; ++i) {
+			kocomputed.subscribe(_noop());
+		}
+
+		for(var i = 0; i < subscribersCount; ++i) {
+			idcomputed.onChange(_noop());
+		}
 	};
 	
 	var suite = new Benchmark.Suite('computed updated ' + updatesCount + ' times with ' + subscribersCount + ' subscribers');
 
 	suite.add('knockout', function() {
-		var observable = ko.observable(initialValue);
-		var computed = ko.pureComputed(function() {
-			return observable();
-		});
-
-		for(var i = 0; i < subscribersCount; ++i) {
-			computed.subscribe(_noop());
-		}
-		
 		for (var j = 0; j < updatesCount; j++) {
-			observable(j);
+			koobservable(j);
 		}
 	});
 
 	suite.add('itDepends', function() {
-		var observable = itDepends.value(initialValue);
-		var computed = itDepends.computed(function() {
-			return observable();
-		}).withNoArgs();
-
-		for(var i = 0; i < subscribersCount; ++i) {
-			computed.onChange(_noop());
-		}
-		
 		for (var j = 0; j < updatesCount; j++) {
-			observable.write(j);
+			idobservable.write(j);
 		}
 	});
 

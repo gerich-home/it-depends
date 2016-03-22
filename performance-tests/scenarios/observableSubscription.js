@@ -19,24 +19,39 @@ module.exports = function(subscribersCount) {
 		function _noop() {
 			return function() {};
 		};
+		
+		var koobservable = ko.observable(initialValue);
+		var idobservable = itDepends.value(initialValue);
 	};
 
-	var suite = new Benchmark.Suite('subscribe to observable with ' + subscribersCount + ' subscribers');
+	var suite = new Benchmark.Suite('subscribe to observable with ' + subscribersCount + ' subscribers and unsubscribe them');
 
 	suite.add('knockout', function() {
-		var observable = ko.observable(initialValue);
+		var subscriptions = [];
 		
 		for (var i = 0; i < subscribersCount; i++) {
-			observable.subscribe(_noop());
+			subscriptions.push(koobservable.subscribe(_noop()));
 		}
+		
+		for (var j = 1; j < subscribersCount; j++) {
+			subscriptions[j].dispose();
+		}
+		
+		subscriptions[0].dispose();
 	});
 
 	suite.add('itDepends', function() {
-		var observable = itDepends.value(initialValue);
+		var subscriptions = [];
 		
 		for (var i = 0; i < subscribersCount; i++) {
-			observable.onChange(_noop());
+			subscriptions.push(idobservable.onChange(_noop()));
 		}
+		
+		for (var j = 1; j < subscribersCount; j++) {
+			subscriptions[j].disable();
+		}
+		
+		subscriptions[0].disable();
 	});
 
 	return suite;
