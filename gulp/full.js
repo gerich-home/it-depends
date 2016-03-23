@@ -1,3 +1,3 @@
 var gulp = require('gulp');
 
-gulp.task('full', ['build', 'all-tests']);
+gulp.task('full', ['build', 'tslint', 'all-tests']);
