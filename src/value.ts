@@ -1,44 +1,44 @@
 'use strict';
 
-import changeNotification, * as changeNotificationTypes from './changeNotification';
+import changeNotification from './changeNotification';
 import * as tracking from './tracking';
-import subscriptionList, * as subscriptionTypes from './subscriptionList';
+import { default as subscriptionList, ISubscription, IChangeHandler, ISubscriptions, IHasValue } from './subscriptionList';
 
-export type ISubscription = subscriptionTypes.ISubscription;
-
-export interface IValue<T> extends subscriptionTypes.IHasValue<T> {
-	write(value: T): void;
+export interface IValue<T> extends IHasValue<T> {
+    write(value: T): void;
 }
 
 export default function<T>(initialValue: T): IValue<T> {
-	var currentValue = initialValue;
-	var id = tracking.takeNextObservableId();
-	var subscriptions: subscriptionTypes.ISubscriptions<T>;
-	
-	var self = <IValue<T>>function() {
-		tracking.recordUsage(id, self, currentValue);
-		return currentValue;
-	};
-	
-	self.write = function(newValue) {
-		if (currentValue === newValue) return;
-		
-		var oldValue = currentValue;
-		currentValue = newValue;
-		tracking.lastWriteVersion++;
-		
-		if(subscriptions) {
-			subscriptions.notify(self, oldValue, newValue);
-		}
-		
-		changeNotification.notify(self, oldValue, newValue);
-	};
-	
-	self.onChange = function(handler) {
-		subscriptions = subscriptions || subscriptionList<T>();
-		
-		return subscriptions.subscribe(handler);
-	};
-	
-	return self;
+    var currentValue = initialValue;
+    var id = tracking.takeNextObservableId();
+    var subscriptions: ISubscriptions<T>;
+
+    var self = <IValue<T>>function(): T {
+        tracking.recordUsage(id, self, currentValue);
+        return currentValue;
+    };
+
+    self.write = function(newValue: T): void {
+        if (currentValue === newValue) {
+            return;
+        }
+
+        var oldValue = currentValue;
+        currentValue = newValue;
+        tracking.lastWriteVersion++;
+
+        if (subscriptions) {
+            subscriptions.notify(self, oldValue, newValue);
+        }
+
+        changeNotification.notify(self, oldValue, newValue);
+    };
+
+    self.onChange = function(handler: IChangeHandler<T>): ISubscription {
+        subscriptions = subscriptions || subscriptionList<T>();
+
+        return subscriptions.subscribe(handler);
+    };
+
+    return self;
 }
