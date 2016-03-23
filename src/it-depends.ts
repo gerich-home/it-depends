@@ -1,15 +1,17 @@
 ﻿'use strict';
 
-import * as subscriptionListTypes from './subscriptionList';
-import changeNotification, * as changeNotificationTypes from './changeNotification';
-import value, * as valueTypes from './value';
-import parametricComputed, * as parametricComputedTypes from './parametricComputed';
-import * as computedTypes from './computed';
-import promiseValue, * as promiseValueTypes from './promiseValue';
+import parametricComputed from './parametricComputed';
+import changeNotification from './changeNotification';
+import promiseValue from './promiseValue';
+import value from './value';
 
-export = {
-	onChange: changeNotification.subscribe,
-	value: value,
-	computed: parametricComputed,
-	promiseValue: promiseValue
+import { ISubscribe } from './subscriptionList';
+
+var onChange: ISubscribe<any> = changeNotification.subscribe;
+
+export {
+    parametricComputed as computed,
+    onChange,
+    promiseValue,
+    value
 };

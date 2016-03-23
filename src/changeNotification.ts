@@ -1,8 +1,7 @@
 'use strict';
 
-import subscriptionList, * as subscriptionTypes from './subscriptionList';
-export * from "./subscriptionList";
+import { default as subscriptionList, ISubscriptions } from './subscriptionList';
 
-var subscriptions = subscriptionList<any>();
+var subscriptions: ISubscriptions<any> = subscriptionList<any>();
 
 export default subscriptions;
