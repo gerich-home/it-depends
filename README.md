@@ -4,6 +4,8 @@
 [![Dependency Status](https://david-dm.org/gerich-home/it-depends.svg)](https://david-dm.org/gerich-home/it-depends)
 [![devDependency Status](https://david-dm.org/gerich-home/it-depends/dev-status.svg)](https://david-dm.org/gerich-home/it-depends#info=devDependencies)
 [![Code Climate](https://codeclimate.com/github/gerich-home/it-depends/badges/gpa.svg)](https://codeclimate.com/github/gerich-home/it-depends)
+[![Issue Stats](http://www.issuestats.com/github/gerich-home/it-depends/badge/pr?style=flat)](http://www.issuestats.com/github/gerich-home/it-depends)
+[![Issue Stats](http://www.issuestats.com/github/gerich-home/it-depends/badge/issue?style=flat)](http://www.issuestats.com/github/gerich-home/it-depends)
 [![Join the chat at https://gitter.im/gerich-home/it-depends](https://badges.gitter.im/gerich-home/it-depends.svg)](https://gitter.im/gerich-home/it-depends?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # it-depends
