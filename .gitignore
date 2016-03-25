@@ -6,3 +6,5 @@
 /.coverdata
 /.coveralls.yml
 /.npmrc
+/.idea
+npm-debug.log*
