@@ -1,0 +1,32 @@
+{
+  "name": "it-depends",
+  "version": "${version}",
+  "description": "Lightweight dependency tracking library for JavaScript",
+  "main": "it-depends.js",
+  "authors": [
+    "Sergey Gerasimov"
+  ],
+  "license": "SEE LICENSE IN license.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gerich-home/it-depends.git"
+  },
+  "keywords": [
+    "dependency",
+    "tracker",
+    "dependency-tracker",
+    "dependencytracker",
+    "lightweight"
+  ],
+  "homepage": "https://github.com/it-depends-js/it-depends-bower",
+  "moduleType": [
+    "amd"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
