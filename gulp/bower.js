@@ -25,18 +25,17 @@ gulp.task('clean-bower-folder', [], function () {
 });
 
 gulp.task('deploy-bower', [], function () {
-    // todo: move repository url to env variable
 
     var remoteUrl = _format('https://{identity}:{authToken}@{repo}', {
-        identity: '',
-        authToken: '',
-        repo: 'github.com/it-depends-js/it-depends-bower.git'
+        identity: process.env.BOWER_REPO_PUBLISH_IDENTITY,
+        authToken: process.env.BOWER_REPO_PUBLISH_TOKEN,
+        repo: process.env.BOWER_REPO
     });
 
     var deployOptions = {
         remoteUrl: remoteUrl,
         origin: 'origin',
-        branch: 'bower-publish-test', // todo: 'master'
+        branch: process.env.BOWER_BRANCH,
         cacheDir: bowerRepoDir,
         message: _format('{version} version was published', { version: pkg.version })
     };
