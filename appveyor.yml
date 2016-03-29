@@ -4,7 +4,7 @@ environment:
   nodejs_version: "0.12"
   COVERALLS_GIT_BRANCH: '$(APPVEYOR_REPO_BRANCH)'
   BOWER_REPO: 'github.com/it-depends-js/it-depends-bower.git'
-  BOWER_BRANCH: 'bower-publish-test'
+  BOWER_BRANCH: 'master'
 
 init:
   - ps: $env:ITDEPENDS_IS_PR = (-not (-not ($env:APPVEYOR_PULL_REQUEST_NUMBER)))

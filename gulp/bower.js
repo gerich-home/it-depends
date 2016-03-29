@@ -64,7 +64,8 @@ gulp.task('publish-bower-repo', [], function (cb) {
         remote: 'origin',
         tag: env.APPVEYOR_REPO_TAG_NAME,
         clone: path.join(__dirname, '../out/bower-repo'),
-        message: commitMessage
+        message: commitMessage,
+        silent: true
     }, cb);
 });
 
