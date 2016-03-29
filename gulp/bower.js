@@ -15,11 +15,6 @@ var out = {
     repo: './out/bower-repo'
 };
 
-var files = {
-    dist: './out/dist/**/*',
-    bower: out.bower + '/**/*'
-};
-
 gulp.task('bower', sequence(
     'clean-bower-folder',
     ['copy-license', 'copy-bower-json', 'copy-bower-artifacts', 'copy-readme'],
@@ -35,7 +30,8 @@ gulp.task('copy-license', [], function () {
 });
 
 gulp.task('copy-bower-artifacts', [], function () {
-    return gulp.src(files.dist).pipe(gulp.dest(out.bower));
+    var distFiles = './out/dist/**/*';
+    return gulp.src(distFiles).pipe(gulp.dest(out.bower));
 });
 
 gulp.task('copy-bower-json', [], function () {
@@ -53,6 +49,7 @@ gulp.task('copy-readme', [], function () {
 
 gulp.task('publish-bower-repo', [], function (cb) {
 
+    // todo: maybe should be moved to appveyor.yml
     var bowerRepoUrl = _format('https://{identity}:{authToken}@{repo}', {
         identity: env.BOWER_REPO_PUBLISH_IDENTITY,
         authToken: env.BOWER_REPO_PUBLISH_TOKEN,
