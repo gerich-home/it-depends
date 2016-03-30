@@ -39,6 +39,7 @@ on_success:
   - ps: >-
       if(($env:APPVEYOR_REPO_TAG_NAME) -and ($env:ITDEPENDS_MASTER_NOT_PR -eq 'True')) {
          ./build/tools/publish-npm.ps1
+         gulp publish
       }
 
 deploy:
