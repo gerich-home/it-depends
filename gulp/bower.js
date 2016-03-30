@@ -43,20 +43,20 @@ gulp.task('copy-bower-json', [], function () {
 
 gulp.task('copy-readme', [], function () {
     return gulp.src('./README.md')
-        .pipe(_addHeader('./publish/readme.header.md'))
+        .pipe(addHeader('./publish/readme.header.md'))
         .pipe(gulp.dest(out.bower));
 });
 
 gulp.task('publish-bower-repo', [], function (cb) {
 
     // todo: maybe should be moved to appveyor.yml
-    var bowerRepoUrl = _format('https://{identity}:{authToken}@{repo}', {
+    var bowerRepoUrl = format('https://{identity}:{authToken}@{repo}', {
         identity: env.BOWER_REPO_PUBLISH_IDENTITY,
         authToken: env.BOWER_REPO_PUBLISH_TOKEN,
         repo: env.BOWER_REPO
     });
 
-    var commitMessage = _format('{version} version was published', {version: env.APPVEYOR_REPO_TAG_NAME});
+    var commitMessage = format('{version} version was published', {version: env.APPVEYOR_REPO_TAG_NAME});
 
     deploy.publish(path.join(__dirname, '../out/bower'), {
         repo: bowerRepoUrl,
@@ -69,11 +69,11 @@ gulp.task('publish-bower-repo', [], function (cb) {
     }, cb);
 });
 
-function _addHeader(fileName) {
+function addHeader(fileName) {
     return plugins.header(fs.readFileSync(fileName, 'utf8'), pkg);
 }
 
-function _format(format, args) {
+function format(format, args) {
     var res = format;
     for (var prop in args) {
         if (!args.hasOwnProperty(prop)) return;
