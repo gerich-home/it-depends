@@ -5,6 +5,9 @@ environment:
   COVERALLS_GIT_BRANCH: '$(APPVEYOR_REPO_BRANCH)'
   BOWER_REPO: 'github.com/it-depends-js/it-depends-bower.git'
   BOWER_BRANCH: 'master'
+  BOWER_REPO_PUBLISH_IDENTITY: 'gerich-home'
+  BOWER_REPO_PUBLISH_TOKEN:
+     secure: DWgqHUlNJ9oe1FvlLxgVxiUN6ScR/di6zDtCG1bzGLW9qr7W3EnURBvqgomL8vpk
 
 init:
   - ps: $env:ITDEPENDS_IS_PR = (-not (-not ($env:APPVEYOR_PULL_REQUEST_NUMBER)))
