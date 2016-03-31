@@ -3,7 +3,7 @@
 Creates promise value wrapper object.
 
 #### Parameters:
-* `promise` *(mandatory, `[Promise<T>](https://promisesaplus.com/#point-21)`)* - the promise object that is the source of the value.
+* `promise` *(mandatory, [`Promise<T>`](https://promisesaplus.com/#point-21))* - the promise object that is the source of the value.
 * `initialValue` *(optional, `T`, `undefined` by default)* - the value to be stored in the promise value when created.
 
 #### Returns:
