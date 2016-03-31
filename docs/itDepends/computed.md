@@ -9,3 +9,10 @@ Creates (parametric)computed value object.
 #### Returns:
 Type: [`computedValue<T>`](../computedValue.md).
 The computed value object.
+
+#### See also:
+* [`itDepends`](itDepends.md)
+* [`observableValue`](observableValue.md)
+* [`computedValue`](computedValue.md)
+* [`computedForArgs`](computedForArgs.md)
+* [`subscription`](subscription.md)

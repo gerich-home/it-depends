@@ -3,3 +3,10 @@ Disables subscription, so change notifications will stop coming any more, unless
 
 #### Returns:
 Type: `void`.
+
+#### See also:
+* [`itDepends`](itDepends.md)
+* [`observableValue`](observableValue.md)
+* [`computedValue`](computedValue.md)
+* [`computedForArgs`](computedForArgs.md)
+* [`subscription`](subscription.md)

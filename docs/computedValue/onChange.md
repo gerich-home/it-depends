@@ -8,3 +8,10 @@ Same as `computedValue.withNoArgs().onChange(callback)`
 #### Returns:
 Type: [`subscription`](../subscription.md).
 The subscription object that can be used to control the subscription.
+
+#### See also:
+* [`itDepends`](itDepends.md)
+* [`observableValue`](observableValue.md)
+* [`computedValue`](computedValue.md)
+* [`computedForArgs`](computedForArgs.md)
+* [`subscription`](subscription.md)

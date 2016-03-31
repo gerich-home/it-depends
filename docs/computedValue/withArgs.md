@@ -7,3 +7,10 @@ Returns the computed value object for the fixed set of parameters. `parameters` 
 #### Returns:
 Type: [`computedForArgs<T>`](../computedForArgs.md).
 The computed value object for the given set of parameters.
+
+#### See also:
+* [`itDepends`](itDepends.md)
+* [`observableValue`](observableValue.md)
+* [`computedValue`](computedValue.md)
+* [`computedForArgs`](computedForArgs.md)
+* [`subscription`](subscription.md)

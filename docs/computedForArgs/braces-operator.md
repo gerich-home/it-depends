@@ -5,3 +5,10 @@ During the call dependencies (values/computeds) used in the calculator will be r
 #### Returns:
 Type: `T`.
 The current value of computed value object for the given parameters.
+
+#### See also:
+* [`itDepends`](itDepends.md)
+* [`observableValue`](observableValue.md)
+* [`computedValue`](computedValue.md)
+* [`computedForArgs`](computedForArgs.md)
+* [`subscription`](subscription.md)

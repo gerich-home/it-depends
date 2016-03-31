@@ -10,3 +10,10 @@ Creates promise value wrapper object.
 Type: [`computedForArgs<T>`](../computedForArgs.md).
 The promise value object filled with the `initialValue` or `undefined` if none specified.
 Depending on the concrete Promise implementation can be immediately filled with the value of a Promise if it was resolved already.
+
+#### See also:
+* [`itDepends`](itDepends.md)
+* [`observableValue`](observableValue.md)
+* [`computedValue`](computedValue.md)
+* [`computedForArgs`](computedForArgs.md)
+* [`subscription`](subscription.md)

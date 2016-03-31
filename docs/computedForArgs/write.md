@@ -6,3 +6,10 @@ Calls write callback for the computed passing selected arguments set.
 
 #### Returns:
 Type: `void`.
+
+#### See also:
+* [`itDepends`](itDepends.md)
+* [`observableValue`](observableValue.md)
+* [`computedValue`](computedValue.md)
+* [`computedForArgs`](computedForArgs.md)
+* [`subscription`](subscription.md)
