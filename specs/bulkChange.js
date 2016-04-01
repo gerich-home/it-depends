@@ -51,25 +51,23 @@ describe('bulk change', function () {
 	});
     
     var atStartOfBulkChange = function(callback) {
-		beforeEach(function() {
-			atStartOfBulkChangeCallbacks.push(callback);
-		});
+		atStartOfBulkChangeCallbacks.push(callback);
     };
     
     var atEndOfBulkChange = function(callback) {
-		afterEach(function() {
-			atEndOfBulkChangeCallbacks.push(callback);
-		});
+		atEndOfBulkChangeCallbacks.push(callback);
     };
     
     var doBulkChange = function(callback) {
-		_(atStartOfBulkChangeCallbacks).forEach(function(c) { c(); });
-        
-		if(callback) {
-            callback();
-        }
-        
-		_(atEndOfBulkChangeCallbacks).forEach(function(c) { c(); });
+        itDepends.bulkChange(function() {
+            _(atStartOfBulkChangeCallbacks).forEach(function(c) { c(); });
+            
+            if(callback) {
+                callback();
+            }
+            
+            _(atEndOfBulkChangeCallbacks).forEach(function(c) { c(); });
+        });
     };
 	
 	it('should not be triggered when new subscription is created', function () {
@@ -94,13 +92,13 @@ describe('bulk change', function () {
             });
             
             doBulkChange(function() {
-                var currentValue = computedValue();
+                expect(computedValue()).to.equal('Hello, Jack');
             });
 		});
         
 		it('should be triggered when bulk change ends', function () {
             doBulkChange(function() {
-                var currentValue = computedValue();
+                expect(computedValue()).to.equal('Hello, Jack');
             });
             
 			expect(calls.count).to.equal(1);
@@ -116,11 +114,9 @@ describe('bulk change', function () {
 
             it('should not be triggered', function () {
                 doBulkChange(function() {
-                    var currentValue = computedValue();
-                    
                     for(var i = 0; i < 10; i++) {    
                         observableValue.write(i);
-                        currentValue = computedValue();
+                        expect(computedValue()).to.equal('Hello, ' + i);
                     }
                 });
             
@@ -140,13 +136,13 @@ describe('bulk change', function () {
                     });
                     
                     doBulkChange(function() {
-                        var currentValue = computedValue();
+                        expect(computedValue()).to.equal('Salut, Jack');
                     });
                 });
                 
                 it('should be triggered when bulk change ends', function () {
                     doBulkChange(function() {
-                        var currentValue = computedValue();
+                        expect(computedValue()).to.equal('Salut, Jack');
                     });
                     
                     expect(calls.count).to.equal(1);
@@ -168,17 +164,17 @@ describe('bulk change', function () {
                 });
                 
                 doBulkChange(function() {
-                    var currentValue = computedValue();
+                    expect(computedValue()).to.equal('Salut, Jack');
                 });
             });
             
             it('should be triggered when bulk change ends', function () {
                 doBulkChange(function() {
-                    var currentValue = computedValue();
+                    expect(computedValue()).to.equal('Salut, Jack');
                 });
                 
                 expect(calls.count).to.equal(1);
-                expectLastChanges({ changed: computedValue.withNoArgs(), from: 'Hello, Bob', to: 'Salut, Bob', args: [] });
+                expectLastChanges({ changed: computedValue.withNoArgs(), from: 'Hello, Bob', to: 'Salut, Jack', args: [] });
             });
         });
     
