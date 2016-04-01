@@ -6,6 +6,9 @@ var buffer = require('vinyl-buffer');
 var header = require('gulp-header');
 var fs = require('fs');
 var pkg = require('../package.json');
+var sourcemaps = require('gulp-sourcemaps');
+var merge = require('merge2');
+var tsify = require('tsify');
 
 var addLicense = function() {
 	return header(fs.readFileSync('./license.txt', 'utf8'), pkg);
@@ -14,18 +17,30 @@ var addLicense = function() {
 gulp.task('build', ['build-ts'], function() {
     var outputDir = './out/dist';
     var libraryName = 'it-depends';
-	var b = browserify({
-		entries: './out/build/' + libraryName + '.js',
-		standalone: 'itDepends'
-	});
-	
-    return b.bundle()
-		.pipe(source(libraryName + '.js'))
-		.pipe(buffer())
-		.pipe(addLicense())
-        .pipe(gulp.dest(outputDir))
-        .pipe(plugins.uglify())
-		.pipe(addLicense())
-        .pipe(plugins.rename(libraryName + '.min.js'))
-        .pipe(gulp.dest(outputDir));
+    
+    var build = function(minified) {
+        var result = browserify({
+                standalone: 'itDepends',
+                debug: true
+            })
+            .add('./src/' + libraryName + '.ts')
+            .plugin(tsify)
+            .bundle()
+            .pipe(source(libraryName + (minified ? '.min' : '') + '.js'))
+            .pipe(buffer())
+            .pipe(sourcemaps.init({ loadMaps: true }));
+        
+        if(minified) {
+            result = result.pipe(plugins.uglify());
+        }
+        
+        return result
+            .pipe(addLicense())
+            .pipe(sourcemaps.write('./'))
+            .pipe(gulp.dest(outputDir));
+    }
+    return merge([
+        build(true),
+        build(false)
+        ]);
 });
