@@ -3,6 +3,7 @@ var mocha = require('gulp-mocha');
 var cover = require('gulp-coverage');
 var isAppveyor = require('./util/is-appveyor.js');
 var isPullRequest = require('./util/is-pull-request.js');
+var ifCoverage = require('./util/if-coverage.js');
 
 function mochaReporter() {
     return isAppveyor()
@@ -12,14 +13,20 @@ function mochaReporter() {
 
 gulp.task('unit-tests-only', ['build'], function() {
     return gulp.src('specs/index.js')
-		.pipe(cover.instrument({
-			pattern: ['out/build/*.js']
-		}))
+		.pipe(ifCoverage(function() {
+            return cover.instrument({
+                pattern: ['out/build/*.js']
+            });
+        }))
         .pipe(mocha({
             reporter: mochaReporter()
         }))
-		.pipe(cover.gather())
-		.pipe(cover.format(['html', 'lcov']))
+		.pipe(ifCoverage(function() {
+            return cover.gather();
+        }))
+		.pipe(ifCoverage(function() {
+            return cover.format(['html', 'lcov']);
+        }))
 		.pipe(gulp.dest('out/reports'));
 });
 

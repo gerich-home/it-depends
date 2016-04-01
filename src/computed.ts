@@ -2,6 +2,7 @@
 
 import * as tracking from './tracking';
 import { default as subscriptionList, ISubscription, ISubscriptions, IHasValue } from './subscriptionList';
+import { valueChanged } from './bulkChange';
 
 export interface ICalculator<T> {
     (params: any[]): T;
@@ -71,6 +72,10 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
 
             dependency.subscription = dependency.observableValue.onChange(self);
         }
+    };
+
+    var notifySubscribers = function(oldValue: T, newValue: T): void {
+        subscriptions.notify(self, oldValue, newValue, args);
     };
 
     self = <IComputedValue<T>>function(): T {
@@ -143,7 +148,7 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
                     dependenciesById = undefined;
 
                     if (oldValue !== currentValue) {
-                        subscriptions.notify(self, oldValue, currentValue, args);
+                        valueChanged(id, self, oldValue, notifySubscribers);
                     }
                 }
             }
