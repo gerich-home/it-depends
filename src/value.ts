@@ -1,6 +1,7 @@
 'use strict';
 
 import changeNotification from './changeNotification';
+import { valueChanged } from './bulkChange';
 import * as tracking from './tracking';
 import { default as subscriptionList, ISubscription, IChangeHandler, ISubscriptions, IHasValue } from './subscriptionList';
 
@@ -18,6 +19,14 @@ export default function<T>(initialValue: T): IValue<T> {
         return currentValue;
     };
 
+    var notifySubscribers = function(from: T, to: T): void {
+        if (subscriptions) {
+            subscriptions.notify(self, from, to);
+        }
+
+        changeNotification.notify(self, from, to);
+    };
+
     self.write = function(newValue: T): void {
         if (currentValue === newValue) {
             return;
@@ -27,11 +36,7 @@ export default function<T>(initialValue: T): IValue<T> {
         currentValue = newValue;
         tracking.lastWriteVersion++;
 
-        if (subscriptions) {
-            subscriptions.notify(self, oldValue, newValue);
-        }
-
-        changeNotification.notify(self, oldValue, newValue);
+        valueChanged(id, self, oldValue, notifySubscribers);
     };
 
     self.onChange = function(handler: IChangeHandler<T>): ISubscription {
