@@ -3,6 +3,7 @@
 import * as tracking from './tracking';
 import { default as subscriptionList, ISubscription, ISubscriptions, IHasValue } from './subscriptionList';
 import { valueChanged } from './bulkChange';
+import { onChangeFinished } from './change';
 
 export interface ICalculator<T> {
     (params: any[]): T;
@@ -94,7 +95,7 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
 
                 tracking
                     .trackingWith(function(dependencyId: number, observableValue: any, capturedValue: any): void {
-                        if (dependenciesById[dependencyId]) {
+                        if (dependenciesById[dependencyId] !== undefined) {
                             return;
                         }
 
@@ -121,7 +122,7 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
                             var oldDependency = oldDependencies[i];
                             var newDependency = dependenciesById[oldDependency.dependencyId];
 
-                            if (newDependency) {
+                            if (newDependency !== undefined) {
                                 newDependency.subscription = oldDependency.subscription;
                             }
                         }
@@ -133,19 +134,17 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
                     }
 
                     if (oldDependencies) {
-                        for (var i = 0; i < oldDependencies.length; i++) {
-                            var oldDependency = oldDependencies[i];
-                            var newDependency = dependenciesById[oldDependency.dependencyId];
+                        onChangeFinished(() => {
+                            for (var i = 0; i < oldDependencies.length; i++) {
+                                var oldDependency = oldDependencies[i];
+                                var newDependency = dependenciesById[oldDependency.dependencyId];
 
-                            if (!newDependency) {
-                                oldDependency.subscription.disable();
+                                if (newDependency === undefined) {
+                                    oldDependency.subscription.disable();
+                                }
                             }
-                        }
-
-                        oldDependencies = undefined;
+                        });
                     }
-
-                    dependenciesById = undefined;
 
                     if (oldValue !== currentValue) {
                         valueChanged(id, self, oldValue, notifySubscribers);

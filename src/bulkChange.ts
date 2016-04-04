@@ -1,6 +1,7 @@
 'use strict';
 
 import { IHasValue } from './subscriptionList';
+import { doChange } from './change';
 
 interface IChange<T> {
     value: IHasValue<T>;
@@ -42,7 +43,7 @@ export default function(changeAction: () => void): void {
     bulkLevels++;
 
     try {
-        changeAction();
+        doChange(changeAction);
     } finally {
         if (isFirstBulk) {
             for (var change of changes) {
