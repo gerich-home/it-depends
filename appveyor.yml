@@ -8,6 +8,7 @@ environment:
   BOWER_REPO_PUBLISH_IDENTITY: 'gerich-home'
   BOWER_REPO_PUBLISH_TOKEN:
      secure: DWgqHUlNJ9oe1FvlLxgVxiUN6ScR/di6zDtCG1bzGLW9qr7W3EnURBvqgomL8vpk
+  SKIP_COVERAGE: 'False'
 
 init:
   - ps: $env:ITDEPENDS_IS_PR = (-not (-not ($env:APPVEYOR_PULL_REQUEST_NUMBER)))
@@ -40,6 +41,9 @@ artifacts:
 
 on_success:
   - ps: >-
+      if($env:ITDEPENDS_MASTER_NOT_PR -eq 'True' -and $env:SKIP_COVERAGE -eq 'False') {
+         gulp coveralls
+      }
       if(($env:APPVEYOR_REPO_TAG_NAME) -and ($env:ITDEPENDS_MASTER_NOT_PR -eq 'True')) {
          ./build/tools/publish-npm.ps1
          gulp publish
