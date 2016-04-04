@@ -14,7 +14,7 @@ var addLicense = function() {
 	return header(fs.readFileSync('./license.txt', 'utf8'), pkg);
 };
 
-gulp.task('build', ['build-ts'], function() {
+gulp.task('build', ['build-ts', 'tslint'], function() {
     var outputDir = './out/dist';
     var libraryName = 'it-depends';
     
