@@ -42,21 +42,24 @@ export default function(changeAction: () => void): void {
     }
 
     bulkLevels++;
-    changeAction();
 
-    if (isFirstBulk) {
-        for (var id of changes.ids) {
-            changes[id].value();
-        }
-    }
-
-    bulkLevels--;
-
-    if (isFirstBulk) {
-        for (var id of changes.ids) {
-            changes[id].notify();
+    try {
+        changeAction();
+    } finally {
+        if (isFirstBulk) {
+            for (var id of changes.ids) {
+                changes[id].value();
+            }
         }
 
-        changes = undefined;
+        bulkLevels--;
+
+        if (isFirstBulk) {
+            for (var id of changes.ids) {
+                changes[id].notify();
+            }
+
+            changes = undefined;
+        }
     }
 }
