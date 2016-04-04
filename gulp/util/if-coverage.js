@@ -12,4 +12,4 @@ module.exports = function(f) {
     return through.obj(function(file, enc, cb) {
         cb(null, file);
     });
-}
+};
