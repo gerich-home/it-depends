@@ -17,17 +17,17 @@ export function takeNextObservableId(): number {
 }
 
 export interface ITrackerExecution {
-    execute(action: () => void): void;
+    execute<T>(action: () => T): T;
 }
 
 export function trackingWith(tracker: Tracker): ITrackerExecution {
     return {
-        execute: function(action: () => void): void {
+        execute: function<T>(action: () => T): T {
             trackers.push(activeTracker);
             activeTracker = tracker;
 
             try {
-                action();
+                return action();
             } finally {
                 activeTracker = trackers.pop();
             }
