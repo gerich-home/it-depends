@@ -48,29 +48,28 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
     var self: IComputed<T>;
 
     var atLeastOneDependencyChanged = function(): boolean {
-        for (var i = 0; i < dependencies.length; i++) {
-            var dependency = dependencies[i];
+        return tracking
+            .trackingWith(undefined)
+            .execute(function(): boolean {
+                for (var dependency of dependencies) {
+                    if (dependency.observableValue() !== dependency.capturedValue) {
+                        return true;
+                    }
+                }
 
-            if (dependency.observableValue() !== dependency.capturedValue) {
-                return true;
-            }
-        }
-
-        return false;
+                return false;
+            });
     };
 
     var unsubscribeDependencies = function(): void {
-        for (var i = 0; i < dependencies.length; i++) {
-            var dependency = dependencies[i];
+        for (var dependency of dependencies) {
             dependency.subscription.disable();
             dependency.subscription = undefined;
         }
     };
 
     var subscribeDependencies = function(): void {
-        for (var i = 0; i < dependencies.length; i++) {
-            var dependency = dependencies[i];
-
+        for (var dependency of dependencies) {
             dependency.subscription = dependency.observableValue.onChange(self);
         }
     };
@@ -118,8 +117,7 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
 
                 if (subscriptionsActive) {
                     if (oldDependencies) {
-                        for (var i = 0; i < oldDependencies.length; i++) {
-                            var oldDependency = oldDependencies[i];
+                        for (var oldDependency of oldDependencies) {
                             var newDependency = dependenciesById[oldDependency.dependencyId];
 
                             if (newDependency !== undefined) {
@@ -128,15 +126,13 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
                         }
                     }
 
-                    for (var i = 0; i < dependencies.length; i++) {
-                        var dependency = dependencies[i];
+                    for (var dependency of dependencies) {
                         dependency.subscription = dependency.subscription || dependency.observableValue.onChange(self);
                     }
 
                     if (oldDependencies) {
                         onChangeFinished(() => {
-                            for (var i = 0; i < oldDependencies.length; i++) {
-                                var oldDependency = oldDependencies[i];
+                            for (var oldDependency of oldDependencies) {
                                 var newDependency = dependenciesById[oldDependency.dependencyId];
 
                                 if (newDependency === undefined) {
