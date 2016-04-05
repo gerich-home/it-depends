@@ -48,17 +48,15 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
     var self: IComputed<T>;
 
     var atLeastOneDependencyChanged = function(): boolean {
-        return tracking
-            .trackingWith(undefined)
-            .execute(function(): boolean {
-                for (var dependency of dependencies) {
-                    if (dependency.observableValue() !== dependency.capturedValue) {
-                        return true;
-                    }
+        return tracking.executeWithTracker(() => {
+            for (var dependency of dependencies) {
+                if (dependency.observableValue() !== dependency.capturedValue) {
+                    return true;
                 }
+            }
 
-                return false;
-            });
+            return false;
+        });
     };
 
     var unsubscribeDependencies = function(): void {
@@ -92,28 +90,26 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
                 var oldDependencies = dependencies;
                 dependencies = [];
 
-                tracking
-                    .trackingWith(function(dependencyId: number, observableValue: any, capturedValue: any): void {
-                        if (dependenciesById[dependencyId] !== undefined) {
-                            return;
-                        }
+                if (subscriptionsActive) {
+                    oldValue = currentValue;
+                }
 
-                        var dependency = {
-                            capturedValue: capturedValue,
-                            dependencyId: dependencyId,
-                            observableValue: observableValue
-                        };
+                var tracker = function(dependencyId: number, observableValue: any, capturedValue: any): void {
+                    if (dependenciesById[dependencyId] !== undefined) {
+                        return;
+                    }
 
-                        dependenciesById[dependencyId] = dependency;
-                        dependencies.push(dependency);
-                    })
-                    .execute(function(): void {
-                        if (subscriptionsActive) {
-                            oldValue = currentValue;
-                        }
+                    var dependency = {
+                        capturedValue: capturedValue,
+                        dependencyId: dependencyId,
+                        observableValue: observableValue
+                    };
 
-                        currentValue = calculator.apply(undefined, args);
-                    });
+                    dependenciesById[dependencyId] = dependency;
+                    dependencies.push(dependency);
+                };
+
+                currentValue = tracking.executeWithTracker(() => calculator.apply(undefined, args), tracker);
 
                 if (subscriptionsActive) {
                     if (oldDependencies) {
