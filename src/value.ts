@@ -4,6 +4,7 @@ import changeNotification from './changeNotification';
 import { valueChanged } from './bulkChange';
 import { doChange } from './change';
 import * as tracking from './tracking';
+import { IDependencyState } from './tracking';
 import { default as subscriptionList, ISubscription, IChangeHandler, ISubscriptions, IHasValue } from './subscriptionList';
 
 export interface IValue<T> extends IHasValue<T> {
@@ -11,13 +12,15 @@ export interface IValue<T> extends IHasValue<T> {
 }
 
 export default function<T>(initialValue: T): IValue<T> {
-    var currentValue = initialValue;
+    var currentState: IDependencyState<T> = {
+        value: initialValue
+    };
     var id = tracking.takeNextObservableId();
     var subscriptions: ISubscriptions<T>;
 
     var self = <IValue<T>>function(): T {
-        tracking.recordUsage(id, self, currentValue);
-        return currentValue;
+        tracking.recordUsage(id, self, () => currentState);
+        return currentState.value;
     };
 
     var notifySubscribers = function(from: T, to: T): void {
@@ -29,16 +32,18 @@ export default function<T>(initialValue: T): IValue<T> {
     };
 
     self.write = function(newValue: T): void {
-        if (currentValue === newValue) {
+        if (currentState.value === newValue) {
             return;
         }
 
-        var oldValue = currentValue;
-        currentValue = newValue;
+        var oldState = currentState;
+        currentState = {
+            value: newValue
+        };
         tracking.lastWriteVersion++;
 
         doChange(() => {
-            valueChanged(id, self, oldValue, notifySubscribers);
+            valueChanged(id, self, oldState.value, notifySubscribers);
         });
     };
 
