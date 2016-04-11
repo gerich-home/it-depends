@@ -2,7 +2,7 @@
 
 export interface IHasValue<T> {
     (): T;
-    onChange(handler: IChangeHandler<T>): ISubscription;
+    onChange(handler: IValueChangeHandler<T>): ISubscription;
 }
 
 export interface IDependencyState<T> {
@@ -10,7 +10,7 @@ export interface IDependencyState<T> {
     unwrap(): T;
 }
 
-export interface IChangeHandler<T> {
+export interface IValueChangeHandler<T> {
     (changed: IHasValue<T>, from: T, to: T): void;
 }
 
@@ -18,13 +18,13 @@ export interface IStateChangeHandler<T> {
     (from: IDependencyState<T>, to: IDependencyState<T>): void;
 }
 
-export interface ISubscribe<T> {
-    (handler: IStateChangeHandler<T>): ISubscription;
+export interface ISubscribe<TChangeHandler> {
+    (handler: TChangeHandler): ISubscription;
 }
 
-export interface ISubscriptions<T> {
-    notify: IStateChangeHandler<T>;
-    subscribe: ISubscribe<T>;
+export interface ISubscriptions<TChangeHandler> {
+    notify: TChangeHandler;
+    subscribe: ISubscribe<TChangeHandler>;
 }
 
 export interface ISubscription {
@@ -37,11 +37,11 @@ export interface IStateListener {
     deactivated(): void;
 }
 
-export default function<T>(stateListener?: IStateListener): ISubscriptions<T> {
+export default function<TChangeHandler>(stateListener?: IStateListener): ISubscriptions<TChangeHandler> {
     interface ILinkedListItem {
         next: ILinkedListItem;
         prev: ILinkedListItem;
-        handler?: IStateChangeHandler<T>;
+        handler?: TChangeHandler;
     }
 
     var head: ILinkedListItem = {
@@ -57,14 +57,14 @@ export default function<T>(stateListener?: IStateListener): ISubscriptions<T> {
     head.next = tail;
 
     return {
-        notify: function(from: IDependencyState<T>, to: IDependencyState<T>): void {
+        notify: <TChangeHandler><any>function(): void {
             var item = head.next;
             while (item !== tail) {
-                item.handler(from, to);
+                (<any>item.handler).apply(undefined, arguments);
                 item = item.next;
             }
         },
-        subscribe: function(handler: IStateChangeHandler<T>): ISubscription {
+        subscribe: function(handler: TChangeHandler): ISubscription {
             var item: ILinkedListItem = undefined;
 
             var subscription = {

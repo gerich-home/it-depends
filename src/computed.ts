@@ -3,7 +3,7 @@
 import * as tracking from './tracking';
 import { DependencyValueState, DependencyErrorState } from './tracking';
 import { default as subscriptionList, ISubscriptions, IDependencyState, IHasValue, ISubscription,
-    IChangeHandler } from './subscriptionList';
+    IValueChangeHandler, IStateChangeHandler } from './subscriptionList';
 import { valueChanged } from './bulkChange';
 import { onChangeFinished } from './change';
 
@@ -15,7 +15,7 @@ export interface IWriteCallback<T> {
     (newValue: T, args: any[], changedValue: IWritableComputedValue<T>): void;
 }
 
-export interface IComputedValueChangeHandler<T> extends IChangeHandler<T> {
+export interface IComputedValueChangeHandler<T> extends IValueChangeHandler<T> {
     (changed: IComputedValue<T>, from: T, to: T, args: any[]): void;
 }
 
@@ -46,7 +46,7 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
     var dependencies: IDependency[];
     var id = tracking.takeNextObservableId();
     var lastReadVersion;
-    var subscriptions: ISubscriptions<T>;
+    var subscriptions: ISubscriptions<IStateChangeHandler<T>>;
     var subscriptionsActive: boolean;
     var self: IComputed<T>;
 
@@ -171,7 +171,7 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
     };
 
     self.onChange = function(handler: IComputedValueChangeHandler<T>): ISubscription {
-        subscriptions = subscriptions || subscriptionList<T>({
+        subscriptions = subscriptions || subscriptionList<IStateChangeHandler<T>>({
             activated: function(): void {
                 oldState = getCurrentState();
 

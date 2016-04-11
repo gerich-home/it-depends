@@ -5,8 +5,8 @@ import { valueChanged } from './bulkChange';
 import { doChange } from './change';
 import * as tracking from './tracking';
 import { DependencyValueState } from './tracking';
-import { default as subscriptionList, ISubscription, IChangeHandler, ISubscriptions, IHasValue,
-    IDependencyState } from './subscriptionList';
+import { default as subscriptionList, ISubscription, IValueChangeHandler, ISubscriptions, IHasValue,
+    IDependencyState, IStateChangeHandler } from './subscriptionList';
 
 export interface IValue<T> extends IHasValue<T> {
     write(value: T): void;
@@ -15,7 +15,7 @@ export interface IValue<T> extends IHasValue<T> {
 export default function<T>(initialValue: T): IValue<T> {
     var currentState: DependencyValueState<T> = new DependencyValueState<T>(initialValue);
     var id = tracking.takeNextObservableId();
-    var subscriptions: ISubscriptions<T>;
+    var subscriptions: ISubscriptions<IStateChangeHandler<T>>;
 
     var getCurrentState = () => currentState;
 
@@ -24,12 +24,13 @@ export default function<T>(initialValue: T): IValue<T> {
         return currentState.unwrap();
     };
 
-    var notifySubscribers = function(from: DependencyValueState<T>, to: DependencyValueState<T>): void {
+    var notifySubscribers = function(from: IDependencyState<T>, to: IDependencyState<T>): void {
+        type ValueState = DependencyValueState<T>;
         if (subscriptions) {
             subscriptions.notify(from, to);
         }
 
-        changeNotification.notify(from, to);
+        changeNotification.notify(self, (<ValueState>from).value, (<ValueState>to).value);
     };
 
     self.write = function(newValue: T): void {
@@ -44,8 +45,8 @@ export default function<T>(initialValue: T): IValue<T> {
         doChange(() => valueChanged(id, getCurrentState, oldState, notifySubscribers));
     };
 
-    self.onChange = function(handler: IChangeHandler<T>): ISubscription {
-        subscriptions = subscriptions || subscriptionList<T>();
+    self.onChange = function(handler: IValueChangeHandler<T>): ISubscription {
+        subscriptions = subscriptions || subscriptionList<IStateChangeHandler<T>>();
 
         return subscriptions.subscribe((from: IDependencyState<T>, to: IDependencyState<T>) => {
             type ValueState = DependencyValueState<T>;
