@@ -1,12 +1,12 @@
 'use strict';
 
-import { IHasValue } from './subscriptionList';
+import { IDependencyState } from './subscriptionList';
 import { doChange } from './change';
 
 interface IChange<T> {
-    value: IHasValue<T>;
-    oldValue: T;
-    newValue?: T;
+    getCurrentState: () => IDependencyState<T>;
+    oldState: IDependencyState<T>;
+    newState?: IDependencyState<T>;
     notify(from: T, to: T): void;
 }
 
@@ -18,14 +18,15 @@ var bulkLevels: number = 0;
 var changes: IChange<any>[];
 var hasChange: IHasChanges;
 
-export function valueChanged<T>(id: number, value: IHasValue<T>, oldValue: T, notify: (from: T, to: T) => void): void {
+export function valueChanged<T>(id: number, getCurrentState: () => IDependencyState<T>, oldState: IDependencyState<T>,
+                                notify: (from: IDependencyState<T>, to: IDependencyState<T>) => void): void {
     if (bulkLevels === 0) {
-        notify(oldValue, value());
+        notify(oldState, getCurrentState());
     } else if (hasChange[id] === undefined) {
         changes.push({
             notify: notify,
-            value: value,
-            oldValue: oldValue
+            getCurrentState: getCurrentState,
+            oldState: oldState
         });
 
         hasChange[id] = true;
@@ -47,7 +48,7 @@ export default function(changeAction: () => void): void {
     } finally {
         if (isFirstBulk) {
             for (var change of changes) {
-                change.newValue = change.value();
+                change.newState = change.getCurrentState();
             }
         }
 
@@ -55,8 +56,8 @@ export default function(changeAction: () => void): void {
 
         if (isFirstBulk) {
             for (var change of changes) {
-                if (change.oldValue !== change.newValue) {
-                    change.notify(change.oldValue, change.newValue);
+                if (!change.oldState.equals(change.newState)) {
+                    change.notify(change.oldState, change.newState);
                 }
             }
 

@@ -5,16 +5,25 @@ export interface IHasValue<T> {
     onChange(handler: IChangeHandler<T>): ISubscription;
 }
 
+export interface IDependencyState<T> {
+    equals(other: IDependencyState<T>): boolean;
+    unwrap(): T;
+}
+
 export interface IChangeHandler<T> {
-    (changed: IHasValue<T>, from: T, to: T, args?: any[]): void;
+    (changed: IHasValue<T>, from: T, to: T): void;
+}
+
+export interface IStateChangeHandler<T> {
+    (from: IDependencyState<T>, to: IDependencyState<T>): void;
 }
 
 export interface ISubscribe<T> {
-    (handler: IChangeHandler<T>): ISubscription;
+    (handler: IStateChangeHandler<T>): ISubscription;
 }
 
 export interface ISubscriptions<T> {
-    notify: IChangeHandler<T>;
+    notify: IStateChangeHandler<T>;
     subscribe: ISubscribe<T>;
 }
 
@@ -32,7 +41,7 @@ export default function<T>(stateListener?: IStateListener): ISubscriptions<T> {
     interface ILinkedListItem {
         next: ILinkedListItem;
         prev: ILinkedListItem;
-        handler?: IChangeHandler<T>;
+        handler?: IStateChangeHandler<T>;
     }
 
     var head: ILinkedListItem = {
@@ -48,14 +57,14 @@ export default function<T>(stateListener?: IStateListener): ISubscriptions<T> {
     head.next = tail;
 
     return {
-        notify: function(changed: IHasValue<T>, from: T, to: T, args: any[]): void {
+        notify: function(from: IDependencyState<T>, to: IDependencyState<T>): void {
             var item = head.next;
             while (item !== tail) {
-                item.handler(changed, from, to, args);
+                item.handler(from, to);
                 item = item.next;
             }
         },
-        subscribe: function(handler: IChangeHandler<T>): ISubscription {
+        subscribe: function(handler: IStateChangeHandler<T>): ISubscription {
             var item: ILinkedListItem = undefined;
 
             var subscription = {

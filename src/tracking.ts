@@ -1,10 +1,29 @@
 'use strict';
 
-import { IHasValue } from './subscriptionList';
+import { IHasValue, IDependencyState } from './subscriptionList';
 
-export interface IDependencyState<T> {
-    value?: T;
-    error?: any;
+export class DependencyValueState<T> implements IDependencyState<T> {
+    constructor(public value: T) {}
+
+    public equals(other: IDependencyState<T>): boolean {
+        return other instanceof DependencyValueState && other.value === this.value;
+    };
+
+    public unwrap(): T {
+        return this.value;
+    }
+}
+
+export class DependencyErrorState implements IDependencyState<any> {
+    constructor(private error: any) {}
+
+    public equals(other: IDependencyState<any>): boolean {
+        return other instanceof DependencyErrorState && other.error === this.error;
+    };
+
+    public unwrap(): any {
+        throw this.error;
+    }
 }
 
 export type Tracker<T> = (id: number, observableValue: IHasValue<T>, getState: () => IDependencyState<T>) => void;

@@ -1,8 +1,9 @@
 'use strict';
 
 import * as tracking from './tracking';
-import { IDependencyState } from './tracking';
-import { default as subscriptionList, ISubscription, ISubscriptions, IHasValue } from './subscriptionList';
+import { DependencyValueState, DependencyErrorState } from './tracking';
+import { default as subscriptionList, ISubscriptions, IDependencyState, IHasValue, ISubscription,
+    IChangeHandler } from './subscriptionList';
 import { valueChanged } from './bulkChange';
 import { onChangeFinished } from './change';
 
@@ -14,7 +15,7 @@ export interface IWriteCallback<T> {
     (newValue: T, args: any[], changedValue: IWritableComputedValue<T>): void;
 }
 
-export interface IComputedValueChangeHandler<T> {
+export interface IComputedValueChangeHandler<T> extends IChangeHandler<T> {
     (changed: IComputedValue<T>, from: T, to: T, args: any[]): void;
 }
 
@@ -27,11 +28,6 @@ export interface IWritableComputedValue<T> extends IComputedValue<T> {
 }
 
 export type IComputed<T> = IComputedValue<T> | IWritableComputedValue<T>
-
-var statesAreDifferent = function<T>(a: IDependencyState<T>, b: IDependencyState<T>): boolean {
-    return a.value !== b.value ||
-        a.error !== b.error;
-};
 
 export default function<T>(calculator: ICalculator<T>, args: any[]): IComputedValue<T>;
 export default function<T>(calculator: ICalculator<T>, args: any[], writeCallback: IWriteCallback<T>): IWritableComputedValue<T>;
@@ -57,7 +53,7 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
     var atLeastOneDependencyChanged = function(): boolean {
         return tracking.executeWithTracker(() => {
             for (var dependency of dependencies) {
-                if (statesAreDifferent(dependency.getState(), dependency.capturedState)) {
+                if (!dependency.getState().equals(dependency.capturedState)) {
                     return true;
                 }
             }
@@ -66,9 +62,7 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
         });
     };
 
-    var notifySubscribers = function(oldValue: T, newValue: T): void {
-        subscriptions.notify(self, oldValue, newValue, args);
-    };
+    var getCurrentState: () => IDependencyState<T>;
 
     var updateState = function(): void {
         if (lastReadVersion === tracking.lastWriteVersion) {
@@ -111,13 +105,9 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
         };
 
         try {
-            currentState = {
-                value: tracking.executeWithTracker(() => calculator.apply(undefined, args), tracker)
-            };
+            currentState = new DependencyValueState(tracking.executeWithTracker(() => calculator.apply(undefined, args), tracker));
         } catch (e) {
-            currentState = {
-                error: e
-            };
+            currentState = new DependencyErrorState(e);
         }
 
         if (subscriptionsActive) {
@@ -147,13 +137,13 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
                 });
             }
 
-            if (statesAreDifferent(currentState, oldState)) {
-                valueChanged(id, self, oldState.value, notifySubscribers);
+            if (!currentState.equals(oldState)) {
+                valueChanged(id, getCurrentState, oldState, subscriptions.notify);
             }
         }
     };
 
-    var getCurrentState = function(): IDependencyState<T> {
+    getCurrentState = function(): IDependencyState<T> {
         updateState();
 
         return currentState;
@@ -177,11 +167,7 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
 
         tracking.recordUsage(id, self, getCurrentState);
 
-        if (currentState.error) {
-            throw currentState.error;
-        }
-
-        return currentState.value;
+        return currentState.unwrap();
     };
 
     self.onChange = function(handler: IComputedValueChangeHandler<T>): ISubscription {
@@ -206,7 +192,10 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
             }
         });
 
-        return subscriptions.subscribe(handler);
+        return subscriptions.subscribe((from: IDependencyState<T>, to: IDependencyState<T>) => {
+            type ValueState = DependencyValueState<T>;
+            handler(self, (<ValueState>from).value, (<ValueState>to).value, args);
+        });
     };
 
     type writable = IWritableComputedValue<T>;
