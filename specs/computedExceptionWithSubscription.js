@@ -1,5 +1,6 @@
 var expect = require('chai').expect;
 var itDepends = require('../out/build/it-depends.js');
+var _ = require('lodash');
 
 describe('computed exceptions with subscriptions', function () {
 	var calls;

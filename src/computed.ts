@@ -29,6 +29,10 @@ export interface IWritableComputedValue<T> extends IComputedValue<T> {
 
 export type IComputed<T> = IComputedValue<T> | IWritableComputedValue<T>
 
+var getValueState = function<T>(state: IDependencyState<T>): DependencyValueState<T> {
+    return state instanceof DependencyValueState ? state : undefined;
+};
+
 export default function<T>(calculator: ICalculator<T>, args: any[]): IComputedValue<T>;
 export default function<T>(calculator: ICalculator<T>, args: any[], writeCallback: IWriteCallback<T>): IWritableComputedValue<T>;
 export default function<T>(calculator: ICalculator<T>, args: any[], writeCallback?: IWriteCallback<T>): IComputed<T> {
@@ -192,9 +196,15 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
             }
         });
 
+        var capturedState = getValueState(getCurrentState());
         return subscriptions.subscribe((from: IDependencyState<T>, to: IDependencyState<T>) => {
-            type ValueState = DependencyValueState<T>;
-            handler(self, (<ValueState>from).value, (<ValueState>to).value, args);
+            if (to instanceof DependencyValueState) {
+                if (capturedState && capturedState.value !== to.value) {
+                    handler(self, capturedState.value, to.value, args);
+                }
+
+                capturedState = to;
+            }
         });
     };
 
