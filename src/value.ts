@@ -13,7 +13,8 @@ export interface IValue<T> extends IHasValue<T> {
 }
 
 export default function<T>(initialValue: T): IValue<T> {
-    var currentState: DependencyValueState<T> = new DependencyValueState<T>(initialValue);
+    type ValueState = DependencyValueState<T>;
+    var currentState: ValueState = new DependencyValueState<T>(initialValue);
     var id = tracking.takeNextObservableId();
     var subscriptions: ISubscriptions<IStateChangeHandler<T>>;
 
@@ -25,7 +26,6 @@ export default function<T>(initialValue: T): IValue<T> {
     };
 
     var notifySubscribers = function(from: IDependencyState<T>, to: IDependencyState<T>): void {
-        type ValueState = DependencyValueState<T>;
         if (subscriptions) {
             subscriptions.notify(from, to);
         }
@@ -49,7 +49,6 @@ export default function<T>(initialValue: T): IValue<T> {
         subscriptions = subscriptions || subscriptionList<IStateChangeHandler<T>>();
 
         return subscriptions.subscribe((from: IDependencyState<T>, to: IDependencyState<T>) => {
-            type ValueState = DependencyValueState<T>;
             handler(self, (<ValueState>from).value, (<ValueState>to).value);
         });
     };
