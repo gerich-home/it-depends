@@ -1,36 +1,37 @@
 'use strict';
 
 import changeNotification from './changeNotification';
-import { valueChanged } from './bulkChange';
+import { stateChanged } from './bulkChange';
 import { doChange } from './change';
 import * as tracking from './tracking';
-import { DependencyValueState } from './tracking';
-import { default as subscriptionList, ISubscription, IValueChangeHandler, ISubscriptions, IHasValue,
-    IDependencyState, IStateChangeHandler } from './subscriptionList';
+import DependencyValueState from './DependencyValueState';
+import subscriptionList from './subscriptionList';
+import { ITrackableWritableValue } from './interfaces/ITrackableWritableValue';
+import { ISubscription } from './interfaces/ISubscription';
+import { ISubscriptions } from './interfaces/ISubscriptions';
+import { IStateChangeHandler } from './interfaces/IStateChangeHandler';
+import { IValueChangeHandler } from './interfaces/IValueChangeHandler';
 
-export interface IValue<T> extends IHasValue<T> {
-    write(value: T): void;
-}
-
-export default function<T>(initialValue: T): IValue<T> {
-    type ValueState = DependencyValueState<T>;
-    var currentState: ValueState = new DependencyValueState<T>(initialValue);
+export default function<T>(initialValue: T): ITrackableWritableValue<T> {
+    var currentState: DependencyValueState<T> = new DependencyValueState<T>(initialValue);
     var id = tracking.takeNextObservableId();
     var subscriptions: ISubscriptions<IStateChangeHandler<T>>;
+    var oldState: DependencyValueState<T>;
 
     var getCurrentState = () => currentState;
 
-    var self = <IValue<T>>function(): T {
+    var self = <ITrackableWritableValue<T>>function(): T {
         tracking.recordUsage(id, self, getCurrentState);
         return currentState.unwrap();
     };
 
-    var notifySubscribers = function(from: IDependencyState<T>, to: IDependencyState<T>): void {
+    var notifySubscribers = function(newState: DependencyValueState<T>): void {
         if (subscriptions) {
-            subscriptions.notify(from, to);
+            subscriptions.notify(newState);
         }
 
-        changeNotification.notify(self, (<ValueState>from).value, (<ValueState>to).value);
+        changeNotification.notify(self, oldState.value, newState.value);
+        oldState = undefined;
     };
 
     self.write = function(newValue: T): void {
@@ -38,18 +39,26 @@ export default function<T>(initialValue: T): IValue<T> {
             return;
         }
 
-        var oldState = currentState;
+        if (oldState === undefined) {
+            oldState = currentState;
+        }
+
         currentState = new DependencyValueState<T>(newValue);
         tracking.lastWriteVersion++;
 
-        doChange(() => valueChanged(id, getCurrentState, oldState, notifySubscribers));
+        doChange(() => stateChanged(id, getCurrentState, notifySubscribers));
     };
 
-    self.onChange = function(handler: IValueChangeHandler<T>): ISubscription {
+    self.onChange = function(handler: IValueChangeHandler<T, ITrackableWritableValue<T>>): ISubscription {
         subscriptions = subscriptions || subscriptionList<IStateChangeHandler<T>>();
 
-        return subscriptions.subscribe((from: IDependencyState<T>, to: IDependencyState<T>) => {
-            handler(self, (<ValueState>from).value, (<ValueState>to).value);
+        var capturedState = currentState;
+        return subscriptions.subscribe((newState: DependencyValueState<T>) => {
+            if (capturedState.value !== newState.value) {
+                handler(self, capturedState.value, newState.value);
+            }
+
+            capturedState = newState;
         });
     };
 

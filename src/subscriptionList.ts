@@ -1,41 +1,8 @@
 'use strict';
 
-export interface IHasValue<T> {
-    (): T;
-    onChange(handler: IValueChangeHandler<T>): ISubscription;
-}
-
-export interface IDependencyState<T> {
-    equals(other: IDependencyState<T>): boolean;
-    unwrap(): T;
-}
-
-export interface IValueChangeHandler<T> {
-    (changed: IHasValue<T>, from: T, to: T): void;
-}
-
-export interface IStateChangeHandler<T> {
-    (from: IDependencyState<T>, to: IDependencyState<T>): void;
-}
-
-export interface ISubscribe<TChangeHandler> {
-    (handler: TChangeHandler): ISubscription;
-}
-
-export interface ISubscriptions<TChangeHandler> {
-    notify: TChangeHandler;
-    subscribe: ISubscribe<TChangeHandler>;
-}
-
-export interface ISubscription {
-    enable(): void;
-    disable(): void;
-}
-
-export interface IStateListener {
-    activated(): void;
-    deactivated(): void;
-}
+import { ISubscriptions } from './interfaces/ISubscriptions';
+import { IStateListener } from './interfaces/IStateListener';
+import { ISubscription } from './interfaces/ISubscription';
 
 export default function<TChangeHandler>(stateListener?: IStateListener): ISubscriptions<TChangeHandler> {
     interface ILinkedListItem {

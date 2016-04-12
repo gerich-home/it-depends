@@ -1,14 +1,11 @@
 'use strict';
 
 import value from './value';
-import { default as computed, IComputedValue } from './computed';
+import { default as computed } from './computed';
+import { ITrackableValue } from './interfaces/ITrackableValue';
+import { IPromise } from './interfaces/IPromise';
 
-export interface IPromise<T> {
-    then<U>(continuation: (resolved: T) => U): any;
-    then(continuation: (resolved: T) => void): any;
-}
-
-export default function<T>(promise: IPromise<T>, initialValue?: T): IComputedValue<T> {
+export default function<T>(promise: IPromise<T>, initialValue?: T): ITrackableValue<T> {
     var currentValue = value(initialValue);
 
     promise.then(currentValue.write);

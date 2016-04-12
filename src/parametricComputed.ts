@@ -1,28 +1,20 @@
 'use strict';
 
-import { ISubscription } from './subscriptionList';
-import { default as computed, IComputedValue, IComputedValueChangeHandler, IWriteCallback, IWritableComputedValue } from './computed';
+import computed from './computed';
+import { IParametricCalculator } from './interfaces/IParametricCalculator';
+import { IWriteCallback } from './interfaces/IWriteCallback';
+import { IParametricComputedValue } from './interfaces/IParametricComputedValue';
+import { ITrackableParametricComputedValue } from './interfaces/ITrackableParametricComputedValue';
+import { ITrackableWritableParametricComputedValue } from './interfaces/ITrackableWritableParametricComputedValue';
+import { IComputedValue } from './interfaces/IComputedValue';
+import { ITrackableComputedValue } from './interfaces/ITrackableComputedValue';
+import { ISubscription } from './interfaces/ISubscription';
+import { IComputedValueChangeHandler } from './interfaces/IComputedValueChangeHandler';
 
-export interface ICalculator<T> {
-    (...params: any[]): T;
-}
-
-export interface IParametricComputedValue<T> extends IComputedValue<T> {
-    onChange(handler: IComputedValueChangeHandler<T>): ISubscription;
-    withNoArgs(): IComputedValue<T>;
-    withArgs(...args: any[]): IComputedValue<T>;
-}
-
-export interface IParametricWritableComputedValue<T> extends IParametricComputedValue<T>, IWritableComputedValue<T> {
-    withNoArgs(): IWritableComputedValue<T>;
-    withArgs(...args: any[]): IWritableComputedValue<T>;
-}
-
-export type IParametricComputed<T> = IParametricComputedValue<T> | IParametricWritableComputedValue<T>
-
-export default function<T>(calculator: ICalculator<T>): IParametricComputedValue<T>;
-export default function<T>(calculator: ICalculator<T>, writeCallback: IWriteCallback<T>): IParametricWritableComputedValue<T>;
-export default function<T>(calculator: ICalculator<T>, writeCallback?: IWriteCallback<T>): IParametricComputed<T> {
+export default function<T>(calculator: IParametricCalculator<T>): ITrackableParametricComputedValue<T>;
+export default function<T>(calculator: IParametricCalculator<T>,
+                           writeCallback: IWriteCallback<T>): ITrackableWritableParametricComputedValue<T>;
+export default function<T>(calculator: IParametricCalculator<T>, writeCallback?: IWriteCallback<T>): IParametricComputedValue<T> {
     interface IComputedHash {
         [id: string]: IComputedValue<any>;
     }
@@ -35,11 +27,11 @@ export default function<T>(calculator: ICalculator<T>, writeCallback?: IWriteCal
         return computedWithArgs();
     };
 
-    self.onChange = function(handler: IComputedValueChangeHandler<T>): ISubscription {
+    self.onChange = function(handler: IComputedValueChangeHandler<T, ITrackableComputedValue<T>>): ISubscription {
         return self.withNoArgs().onChange(handler);
     };
 
-    self.withNoArgs = function(): IComputedValue<T> {
+    self.withNoArgs = function(): ITrackableComputedValue<T> {
         return cache[''] ||
             (cache[''] = computed(calculator, [], writeCallback));
     };
@@ -75,7 +67,7 @@ export default function<T>(calculator: ICalculator<T>, writeCallback?: IWriteCal
     };
 
     if (writeCallback !== undefined) {
-        type writable = IParametricWritableComputedValue<T>;
+        type writable = ITrackableWritableParametricComputedValue<T>;
         (<writable>self).write = (newValue) => (<writable>self).withNoArgs().write(newValue);
         return <writable>self;
     }
