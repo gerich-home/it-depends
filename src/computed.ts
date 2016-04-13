@@ -177,8 +177,8 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
         var capturedState = getValueState(getCurrentState());
         return subscriptions.subscribe((newState: IDependencyState<T>) => {
             if (newState instanceof DependencyValueState) {
-                if (capturedState && capturedState.value !== newState.value) {
-                    handler(self, capturedState.value, newState.value, args);
+                if (capturedState && capturedState.storedValue !== newState.storedValue) {
+                    handler(self, capturedState.storedValue, newState.storedValue, args);
                 }
 
                 capturedState = newState;

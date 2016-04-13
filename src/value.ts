@@ -30,12 +30,12 @@ export default function<T>(initialValue: T): ITrackableWritableValue<T> {
             subscriptions.notify(newState);
         }
 
-        changeNotification.notify(self, oldState.value, newState.value);
+        changeNotification.notify(self, oldState.storedValue, newState.storedValue);
         oldState = undefined;
     };
 
     self.write = function(newValue: T): void {
-        if (currentState.value === newValue) {
+        if (currentState.storedValue === newValue) {
             return;
         }
 
@@ -54,8 +54,8 @@ export default function<T>(initialValue: T): ITrackableWritableValue<T> {
 
         var capturedState = currentState;
         return subscriptions.subscribe((newState: DependencyValueState<T>) => {
-            if (capturedState.value !== newState.value) {
-                handler(self, capturedState.value, newState.value);
+            if (capturedState.storedValue !== newState.storedValue) {
+                handler(self, capturedState.storedValue, newState.storedValue);
             }
 
             capturedState = newState;
