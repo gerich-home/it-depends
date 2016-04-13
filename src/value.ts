@@ -55,13 +55,16 @@ export default function<T>(initialValue: T): ITrackableWritableValue<T> {
     self.onChange = function(handler: IValueChangeHandler<T, ITrackableWritableValue<T>>): ISubscription {
         subscriptions = subscriptions || subscriptionList<IStateChangeHandler<DependencyValueState<T>>>();
 
-        var capturedState = currentState;
+        var capturedValue = currentState.value;
+
         return subscriptions.subscribe((newState: DependencyValueState<T>) => {
-            if (capturedState.value !== newState.value) {
-                handler(self, capturedState.value, newState.value);
+            var newValue = newState.value;
+
+            if (capturedValue !== newValue) {
+                handler(self, capturedValue, newValue);
             }
 
-            capturedState = newState;
+            capturedValue = newValue;
         });
     };
 
