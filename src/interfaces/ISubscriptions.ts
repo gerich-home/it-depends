@@ -9,4 +9,5 @@ export interface ISubscribe<TChangeHandler> {
 export interface ISubscriptions<TChangeHandler> {
     notify: TChangeHandler;
     subscribe: ISubscribe<TChangeHandler>;
+    active(): boolean;
 }

@@ -70,6 +70,9 @@ export default function<TChangeHandler>(stateListener?: IStateListener): ISubscr
             subscription.enable();
 
             return subscription;
+        },
+        active: function(): boolean {
+            return head.next !== tail;
         }
     };
 }

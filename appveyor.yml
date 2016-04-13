@@ -32,7 +32,7 @@ build: off
 artifacts:
   - path: 'out\dist\*.js'
     name: it-depends-library
-  - path: 'out\definitions\*.d.ts'
+  - path: 'out\definitions\**\*.d.ts'
     name: typescript-definitions
   - path: 'out\reports\coverage.html'
     name: coverage-html

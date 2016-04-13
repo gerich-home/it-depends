@@ -39,7 +39,6 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
     var id = tracking.takeNextObservableId();
     var lastReadVersion;
     var subscriptions: ISubscriptions<IStateChangeHandler<T>>;
-    var subscriptionsActive: boolean;
     var self: ITrackableComputedValue<T>;
 
     var atLeastOneDependencyChanged = function(): boolean {
@@ -98,7 +97,7 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
             currentState = new DependencyErrorState(e);
         }
 
-        if (subscriptionsActive) {
+        if (subscriptions && subscriptions.active()) {
             if (oldDependencies) {
                 for (var oldDependency of oldDependencies) {
                     var newDependency = dependenciesById[oldDependency.dependencyId];
@@ -162,15 +161,11 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
                 if (dependencies) {
                     subscribeDependencies();
                 }
-
-                subscriptionsActive = true;
             },
             deactivated: function(): void {
                 if (dependencies) {
                     unsubscribeDependencies();
                 }
-
-                subscriptionsActive = false;
             }
         });
 
