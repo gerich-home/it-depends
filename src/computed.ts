@@ -38,7 +38,7 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
     var dependencies: IDependency[];
     var id = tracking.takeNextObservableId();
     var lastReadVersion;
-    var subscriptions: ISubscriptions<IStateChangeHandler<T>>;
+    var subscriptions: ISubscriptions<IStateChangeHandler<IDependencyState<T>>>;
     var self: ITrackableComputedValue<T>;
 
     var atLeastOneDependencyChanged = function(): boolean {
@@ -156,7 +156,7 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
     };
 
     self.onChange = function(handler: IComputedValueChangeHandler<T, ITrackableComputedValue<T>>): ISubscription {
-        subscriptions = subscriptions || subscriptionList<IStateChangeHandler<T>>({
+        subscriptions = subscriptions || subscriptionList<IStateChangeHandler<IDependencyState<T>>>({
             activated: function(): void {
                 if (dependencies) {
                     subscribeDependencies();

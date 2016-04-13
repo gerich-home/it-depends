@@ -15,7 +15,7 @@ import { IValueChangeHandler } from './interfaces/IValueChangeHandler';
 export default function<T>(initialValue: T): ITrackableWritableValue<T> {
     var currentState: DependencyValueState<T> = new DependencyValueState<T>(initialValue);
     var id = tracking.takeNextObservableId();
-    var subscriptions: ISubscriptions<IStateChangeHandler<T>>;
+    var subscriptions: ISubscriptions<IStateChangeHandler<DependencyValueState<T>>>;
     var oldState: DependencyValueState<T>;
 
     var getCurrentState = () => currentState;
@@ -30,7 +30,10 @@ export default function<T>(initialValue: T): ITrackableWritableValue<T> {
             subscriptions.notify(newState);
         }
 
-        changeNotification.notify(self, oldState.value, newState.value);
+        if (oldState.value !== newState.value) {
+            changeNotification.notify(self, oldState.value, newState.value);
+        }
+
         oldState = undefined;
     };
 
@@ -50,7 +53,7 @@ export default function<T>(initialValue: T): ITrackableWritableValue<T> {
     };
 
     self.onChange = function(handler: IValueChangeHandler<T, ITrackableWritableValue<T>>): ISubscription {
-        subscriptions = subscriptions || subscriptionList<IStateChangeHandler<T>>();
+        subscriptions = subscriptions || subscriptionList<IStateChangeHandler<DependencyValueState<T>>>();
 
         var capturedState = currentState;
         return subscriptions.subscribe((newState: DependencyValueState<T>) => {
