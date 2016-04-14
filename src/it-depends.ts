@@ -5,9 +5,8 @@ import changeNotification from './changeNotification';
 import promiseValue from './promiseValue';
 import value from './value';
 import bulkChange from './bulkChange';
-import { ISubscribe } from './interfaces/ISubscriptions';
 
-var onChange: ISubscribe<any> = changeNotification.subscribe;
+var onChange: typeof changeNotification.subscribe = changeNotification.subscribe;
 
 export {
     parametricComputed as computed,
