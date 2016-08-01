@@ -24,10 +24,10 @@ export default function<TChangeHandler>(stateListener?: IStateListener): ISubscr
     head.next = tail;
 
     return {
-        notify: <TChangeHandler><any>function(): void {
+        forEach: function(callback: (handler: TChangeHandler) => void): void {
             var item = head.next;
             while (item !== tail) {
-                (<any>item.handler).apply(undefined, arguments);
+                callback(item.handler);
                 item = item.next;
             }
         },

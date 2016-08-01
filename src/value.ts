@@ -9,13 +9,16 @@ import subscriptionList from './subscriptionList';
 import { ITrackableWritableValue } from './interfaces/ITrackableWritableValue';
 import { ISubscription } from './interfaces/ISubscription';
 import { ISubscriptions } from './interfaces/ISubscriptions';
-import { IStateChangeHandler } from './interfaces/IStateChangeHandler';
 import { IValueChangeHandler } from './interfaces/IValueChangeHandler';
 
 export default function<T>(initialValue: T): ITrackableWritableValue<T> {
+    interface IChangeHandler {
+        (to: T): void;
+    }
+
     var currentState: DependencyValueState<T> = new DependencyValueState<T>(initialValue);
     var id = tracking.takeNextObservableId();
-    var subscriptions: ISubscriptions<IStateChangeHandler<DependencyValueState<T>>>;
+    var subscriptions: ISubscriptions<IChangeHandler>;
     var oldState: DependencyValueState<T>;
 
     var getCurrentState = () => currentState;
@@ -27,7 +30,7 @@ export default function<T>(initialValue: T): ITrackableWritableValue<T> {
 
     var notifySubscribers = function(newState: DependencyValueState<T>): void {
         if (subscriptions) {
-            subscriptions.notify(newState);
+            subscriptions.forEach(h => h(newState.value));
         }
 
         if (oldState.value !== newState.value) {
@@ -53,18 +56,16 @@ export default function<T>(initialValue: T): ITrackableWritableValue<T> {
     };
 
     self.onChange = function(handler: IValueChangeHandler<T, ITrackableWritableValue<T>>): ISubscription {
-        subscriptions = subscriptions || subscriptionList<IStateChangeHandler<DependencyValueState<T>>>();
+        subscriptions = subscriptions || subscriptionList<IChangeHandler>();
 
         var capturedValue = currentState.value;
 
-        return subscriptions.subscribe((newState: DependencyValueState<T>) => {
-            var newValue = newState.value;
-
-            if (capturedValue !== newValue) {
-                handler(self, capturedValue, newValue);
+        return subscriptions.subscribe((changed: ITrackableWritableValue<T>, from: T, to: T) => {
+            if (capturedValue !== to) {
+                handler(self, capturedValue, to);
             }
 
-            capturedValue = newValue;
+            capturedValue = to;
         });
     };
 

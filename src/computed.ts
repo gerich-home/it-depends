@@ -124,7 +124,7 @@ export default function<T>(calculator: ICalculator<T>, args: any[], writeCallbac
                 });
             }
 
-            stateChanged(id, getCurrentState, subscriptions.notify);
+            stateChanged(id, getCurrentState, newState => subscriptions.forEach(h => h(newState)));
         }
     };
 
