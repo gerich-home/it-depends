@@ -1,7 +1,7 @@
 'use strict';
 
-import value from './value';
 import { default as computed, IComputedValue } from './computed';
+import value from './value';
 
 export interface IPromise<T> {
     then<U>(continuation: (resolved: T) => U): any;
@@ -9,7 +9,7 @@ export interface IPromise<T> {
 }
 
 export default function<T>(promise: IPromise<T>, initialValue?: T): IComputedValue<T> {
-    var currentValue = value(initialValue);
+    const currentValue = value(initialValue);
 
     promise.then(currentValue.write);
 

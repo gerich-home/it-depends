@@ -35,12 +35,12 @@ export default function<T>(stateListener?: IStateListener): ISubscriptions<T> {
         handler?: IChangeHandler<T>;
     }
 
-    var head: ILinkedListItem = {
+    const head: ILinkedListItem = {
         next: undefined,
         prev: undefined
     };
 
-    var tail: ILinkedListItem = {
+    const tail: ILinkedListItem = {
         next: undefined,
         prev: head
     };
@@ -48,18 +48,18 @@ export default function<T>(stateListener?: IStateListener): ISubscriptions<T> {
     head.next = tail;
 
     return {
-        notify: function(changed: IHasValue<T>, from: T, to: T, args: any[]): void {
-            var item = head.next;
+        notify(changed: IHasValue<T>, from: T, to: T, args: any[]): void {
+            let item = head.next;
             while (item !== tail) {
                 item.handler(changed, from, to, args);
                 item = item.next;
             }
         },
-        subscribe: function(handler: IChangeHandler<T>): ISubscription {
-            var item: ILinkedListItem = undefined;
+        subscribe(handler: IChangeHandler<T>): ISubscription {
+            let item: ILinkedListItem = undefined;
 
-            var subscription = {
-                disable: function(): void {
+            const subscription = {
+                disable(): void {
                     if (!item) {
                         return;
                     }
@@ -73,7 +73,7 @@ export default function<T>(stateListener?: IStateListener): ISubscriptions<T> {
 
                     item = undefined;
                 },
-                enable: function(): void {
+                enable(): void {
                     if (item) { return; }
 
                     item = {
