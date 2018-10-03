@@ -1,7 +1,7 @@
 environment:
   encrypt_token:
     secure: 2Tozd/hUxQZSOt/m/E5Spg==
-  nodejs_version: "0.12"
+  nodejs_version: "8.12.0"
   COVERALLS_GIT_BRANCH: '$(APPVEYOR_REPO_BRANCH)'
   BOWER_REPO: 'github.com/it-depends-js/it-depends-bower.git'
   BOWER_BRANCH: 'master'
