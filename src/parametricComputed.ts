@@ -1,7 +1,7 @@
 'use strict';
 
+import { default as computed, IComputedValue, IComputedValueChangeHandler, IWritableComputedValue, IWriteCallback } from './computed';
 import { ISubscription } from './subscriptionList';
-import { default as computed, IComputedValue, IComputedValueChangeHandler, IWriteCallback, IWritableComputedValue } from './computed';
 
 export interface ICalculator<T> {
     (...params: any[]): T;
@@ -18,39 +18,54 @@ export interface IParametricWritableComputedValue<T> extends IParametricComputed
     withArgs(...args: any[]): IWritableComputedValue<T>;
 }
 
-export type IParametricComputed<T> = IParametricComputedValue<T> | IParametricWritableComputedValue<T>
+export type IParametricComputed<T> = IParametricComputedValue<T> | IParametricWritableComputedValue<T>;
+
+interface IComputedHash {
+    [id: string]: IComputedValue<any>;
+}
 
 export default function<T>(calculator: ICalculator<T>): IParametricComputedValue<T>;
 export default function<T>(calculator: ICalculator<T>, writeCallback: IWriteCallback<T>): IParametricWritableComputedValue<T>;
 export default function<T>(calculator: ICalculator<T>, writeCallback?: IWriteCallback<T>): IParametricComputed<T> {
-    interface IComputedHash {
-        [id: string]: IComputedValue<any>;
+    const cache: IComputedHash = {};
+    const allArguments = [];
+
+    const self = <IParametricComputedValue<T>>read;
+
+    self.onChange = onChange;
+    self.withNoArgs = withNoArgs;
+    self.withArgs = withArgs;
+
+    if (writeCallback !== undefined) {
+        type writable = IParametricWritableComputedValue<T>;
+        (<writable>self).write = (newValue) => (<writable>self).withNoArgs().write(newValue);
+        return <writable>self;
     }
 
-    var cache: IComputedHash = {};
-    var allArguments = [];
+    return self;
 
-    var self = <IParametricComputedValue<T>>function(): T {
-        var computedWithArgs = self.withArgs.apply(undefined, arguments);
+    function read(...args: any[]): T {
+        const computedWithArgs = self.withArgs(...args);
         return computedWithArgs();
-    };
+    }
 
-    self.onChange = function(handler: IComputedValueChangeHandler<T>): ISubscription {
+    function onChange(handler: IComputedValueChangeHandler<T>): ISubscription {
         return self.withNoArgs().onChange(handler);
-    };
+    }
 
-    self.withNoArgs = function(): IComputedValue<T> {
+    function withNoArgs(): IComputedValue<T> {
         return cache[''] ||
             (cache[''] = computed(calculator, [], writeCallback));
-    };
+    }
 
-    self.withArgs = function(): IComputedValue<T> {
-        var key = '';
-        var skippingUndefinedValues = true;
-        var argsToDrop = 0;
+    function withArgs(...args: any[]): IComputedValue<T> {
+        let key = '';
+        let skippingUndefinedValues = true;
+        let argsToDrop = 0;
 
-        for (var i = arguments.length - 1; i >= 0; i--) {
-            var arg = arguments[i];
+        for (let i = args.length - 1; i >= 0; i--) {
+            const arg = args[i];
+
             if (skippingUndefinedValues) {
                 if (arg === undefined) {
                     argsToDrop++;
@@ -60,7 +75,7 @@ export default function<T>(calculator: ICalculator<T>, writeCallback?: IWriteCal
                 skippingUndefinedValues = false;
             }
 
-            var index = allArguments.indexOf(arg);
+            const index = allArguments.indexOf(arg);
 
             if (index === -1) {
                 key += allArguments.length + ':';
@@ -71,14 +86,6 @@ export default function<T>(calculator: ICalculator<T>, writeCallback?: IWriteCal
         }
 
         return cache[key] ||
-            (cache[key] = computed(calculator, Array.prototype.slice.call(arguments, 0, arguments.length - argsToDrop), writeCallback));
-    };
-
-    if (writeCallback !== undefined) {
-        type writable = IParametricWritableComputedValue<T>;
-        (<writable>self).write = (newValue) => (<writable>self).withNoArgs().write(newValue);
-        return <writable>self;
+            (cache[key] = computed(calculator, Array.prototype.slice.call(args, 0, args.length - argsToDrop), writeCallback));
     }
-
-    return self;
 }

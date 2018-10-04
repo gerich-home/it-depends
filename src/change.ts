@@ -1,7 +1,7 @@
 'use strict';
 
-var changeLevels: number = 0;
-var actions: (() => void)[];
+let changeLevels: number = 0;
+let actions: (() => void)[];
 
 export function onChangeFinished(action: () => void): void {
     if (changeLevels === 0) {
@@ -12,7 +12,7 @@ export function onChangeFinished(action: () => void): void {
 }
 
 export function doChange(changeAction: () => void): void {
-    var isFirstChange = changeLevels === 0;
+    const isFirstChange = changeLevels === 0;
 
     if (isFirstChange) {
         actions = [];
@@ -26,7 +26,7 @@ export function doChange(changeAction: () => void): void {
         changeLevels--;
 
         if (isFirstChange) {
-            for (var action of actions) {
+            for (const action of actions) {
                 action();
             }
 

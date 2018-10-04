@@ -1,10 +1,12 @@
 'use strict';
 
 export type Tracker = (id: number, observableValue: any, currentValue: any) => void;
-var activeTracker: Tracker;
-var nextObservableId = 0;
+let activeTracker: Tracker;
+let nextObservableId = 0;
 
-export var lastWriteVersion = 0;
+export const state = {
+    lastWriteVersion: 0
+};
 
 export function recordUsage(id: number, observableValue: any, currentValue: any): void {
     if (!activeTracker) { return; }
@@ -16,7 +18,7 @@ export function takeNextObservableId(): number {
 }
 
 export function executeWithTracker<T>(action: () => T, tracker?: Tracker): T {
-    var currentTracker = activeTracker;
+    const currentTracker = activeTracker;
     activeTracker = tracker;
 
     try {

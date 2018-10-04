@@ -4,11 +4,11 @@ var merge = require('merge2');
 var sourcemaps = require('gulp-sourcemaps');
 
 gulp.task('build-ts', function() {
-	var tsProject = ts.createProject('./tsconfig.json');
-	
-	var tsResult = gulp.src('src/*.ts')
+    var tsProject = ts.createProject('./tsconfig.json');
+
+    var tsResult = gulp.src('src/*.ts')
         .pipe(sourcemaps.init())
-		.pipe(ts(tsProject));
+        .pipe(tsProject());
 
     var js = tsResult.js
             .pipe(sourcemaps.write('./'))

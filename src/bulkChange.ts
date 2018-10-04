@@ -1,7 +1,7 @@
 'use strict';
 
-import { IHasValue } from './subscriptionList';
 import { doChange } from './change';
+import { IHasValue } from './subscriptionList';
 
 interface IChange<T> {
     value: IHasValue<T>;
@@ -14,9 +14,9 @@ interface IHasChanges {
     [id: number]: boolean;
 }
 
-var bulkLevels: number = 0;
-var changes: IChange<any>[];
-var hasChange: IHasChanges;
+let bulkLevels: number = 0;
+let changes: IChange<any>[];
+let hasChange: IHasChanges;
 
 export function valueChanged<T>(id: number, value: IHasValue<T>, oldValue: T, notify: (from: T, to: T) => void): void {
     if (bulkLevels === 0) {
@@ -33,7 +33,7 @@ export function valueChanged<T>(id: number, value: IHasValue<T>, oldValue: T, no
 }
 
 export default function(changeAction: () => void): void {
-    var isFirstBulk = bulkLevels === 0;
+    const isFirstBulk = bulkLevels === 0;
 
     if (isFirstBulk) {
         changes = [];
@@ -46,7 +46,7 @@ export default function(changeAction: () => void): void {
         doChange(changeAction);
     } finally {
         if (isFirstBulk) {
-            for (var change of changes) {
+            for (const change of changes) {
                 change.newValue = change.value();
             }
         }
@@ -54,7 +54,7 @@ export default function(changeAction: () => void): void {
         bulkLevels--;
 
         if (isFirstBulk) {
-            for (var change of changes) {
+            for (const change of changes) {
                 if (change.oldValue !== change.newValue) {
                     change.notify(change.oldValue, change.newValue);
                 }
